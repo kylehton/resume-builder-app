@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ChatBox.css';
 
-const ChatBox = ({ onResumeUpload, onDownloadClick }) => {
+const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [autoMessageSent, setAutoMessageSent] = useState(false); // Track if auto message has been sent
+
+  useEffect(() => {
+    if (!autoMessageSent) {
+      const timer = setTimeout(() => {
+        const newMessage = { content: 'Please upload your resume to begin.', role: "auto" };
+        setMessages([...messages, newMessage]);
+        setAutoMessageSent(true);
+        onAutoMessage();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [autoMessageSent, messages, onAutoMessage]);
 
   const handleSend = async () => {
     if (input.trim()) {
@@ -22,7 +35,6 @@ const ChatBox = ({ onResumeUpload, onDownloadClick }) => {
       });
 
       const data = await response.json();
-
       setMessages(messages => [
         ...messages,
         { role: "assistant", content: data.response } // Assistant message
@@ -57,7 +69,7 @@ const ChatBox = ({ onResumeUpload, onDownloadClick }) => {
       <div className="messages-container">
         {messages.map((msg, index) => (
           <div
-            className={`message ${msg.role}`} // use msg.role for styling
+          className={`message ${msg.role === 'user' ? 'message' : msg.role === 'auto' ? 'auto-message' : 'ai-message'}`} // use msg.role for styling
             key={index}
           >
             {msg.content} {/* Correctly rendering the content */}
