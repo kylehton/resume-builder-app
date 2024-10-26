@@ -1,0 +1,95 @@
+.chatbox-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #f5f6fa;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .messages-container {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 5px;
+    width: 100%;
+  }
+  
+  .message {
+    padding: 5px;
+    margin-bottom: 10px;
+    background-color: #ebc7ff;
+    border-radius: 5px;
+    font-weight: bold;
+    align-self: right;
+    max-width: 55%;
+    margin-left: auto;
+  }
+
+  /* Style the auto-message differently */
+  .auto-message {
+    background-color: #1abac5; /* Different background color for auto-messages */
+    font-style: italic; /* Italic font style for auto-messages */
+    padding: 10px;
+    margin-top: 5px;
+    margin-left: 0%;
+    max-width: 52%;
+    font-weight: bold;
+    text-align: left;
+  }
+  
+  .input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+  }
+  
+  .chat-input {
+    flex-grow: 1;
+    padding: 10px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .send-btn, .attach-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .finished-btn {
+    background-color: #dd4527;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+  
+  .send-btn:hover, .attach-btn:hover, .finished-btn:hover {
+    background-color: #21c8de;
+  }
+  
+  /* Responsive */
+  @media screen and (max-width: 768px) {
+    .input-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .chat-input, .send-btn, .attach-btn {
+      width: 100%;
+      margin-top: 5px;
+    }
+  }
