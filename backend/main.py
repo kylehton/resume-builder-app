@@ -1,10 +1,8 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from generate.apiCall import process_message  # Import the process_message function
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
-from chatAPI import process_message
 import uvicorn
 import os
 
@@ -14,7 +12,7 @@ load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://resume-builder-frontend-nine.vercel.app/","http://localhost:3000"],  # uses default local host on machine
+    allow_origins=["https://resume-builder-frontend-nine.vercel.app","http://localhost:3000"],  # uses default local host on machine
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
