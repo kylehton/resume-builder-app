@@ -1,0 +1,44 @@
+.resumebox-container {
+  width: 10%; /* Ensure the container takes up the full width */
+  height: auto; /* Set height to auto to scale dynamically */
+  max-height: 100vh; /* Ensure it doesn't exceed the viewport height */
+  overflow: hidden; /* Hide content that overflows the box */
+  position: relative; /* For controlling child elements */
+  border: 1px solid #ccc; /* Optional border */
+  display: inline-block; /* Center the canvas */
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+}
+
+.pdf-canvas {
+  max-width: 100%; /* Make sure the canvas scales with the container */
+  max-height: 100%; /* Ensure the canvas doesn't overflow vertically */
+  height: auto; /* Maintain aspect ratio */
+  display: block;
+  margin: 0  auto; /* Center the canvas horizontally */
+}
+
+.resume-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 2px dashed #ccc;
+  color: #888;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .resumebox-container {
+    max-height: 400px; /* Limit height on smaller screens */
+  }
+
+  .resume-placeholder {
+    padding: 10px;
+  }
+}

@@ -1,0 +1,277 @@
+/* General styles for the navbar container */
+.navbar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 200px;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
+    overflow: hidden; /* Ensures content does not overflow out of the navbar */
+}
+
+/* Mobile Navbar */
+.mobile-navbar {
+    display: none; /* Initially hidden for larger screens */
+}
+
+.burger-button {
+    position: fixed;
+    right: 5%;
+    bottom: 35px;
+    z-index: 9998;
+    cursor: pointer;
+    padding: 5px 4px;
+    background-color: green;
+}
+.burger-button.white i{background-color:#fff}
+
+.burger-button:active,
+#page-header .burger:focus {
+    outline-color: 0;
+    outline-style: none;
+    outline-width: 0
+}
+
+.burger-button i {
+    display: block;
+    width: 42px;
+    height: 2px;
+    margin: 8px;
+    background-color: #7a7a7a
+}
+
+.burger-button i:nth-child(n) {
+    -moz-transition: -moz-transform .45s cubic-bezier(.43, .77, .15, 1.5), background .3s ease;
+    -o-transition: -o-transform .45s cubic-bezier(.43, .77, .15, 1.5), background .3s ease;
+    -webkit-transition: -webkit-transform .45s cubic-bezier(.43, .77, .15, 1.5), background .3s ease;
+    transition: transform .45s cubic-bezier(.43, .77, .15, 1.5), background .3s ease
+}
+
+.burger-button.hover i:nth-child(1) {
+    -moz-transform: translate3d(0, -4px, 0);
+    -ms-transform: translate3d(0, -4px, 0);
+    -webkit-transform: translate3d(0, -4px, 0);
+    transform: translate3d(0, -4px, 0)
+}
+
+.burger-button.hover i:nth-child(3) {
+    -moz-transform: translate3d(0, 4px, 0);
+    -ms-transform: translate3d(0, 4px, 0);
+    -webkit-transform: translate3d(0, 4px, 0);
+    transform: translate3d(0, 4px, 0)
+}
+
+.burger-button.st-1 {
+    animation: rotate-back-in .8s cubic-bezier(.2, .86, .35, 1) forwards;
+    -webkit-animation: rotate-back-in .8s cubic-bezier(.2, .86, .35, 1) forwards
+}
+
+.burger-button.st-1 i:nth-child(1) {
+    -moz-transform: translate3d(0, 9px, 0);
+    -ms-transform: translate3d(0, 9px, 0);
+    -webkit-transform: translate3d(0, 9px, 0);
+    transform: translate3d(0, 9px, 0)
+}
+
+.burger-button.st-1 i:nth-child(3) {
+    -moz-transform: translate3d(0, -9px, 0);
+    -ms-transform: translate3d(0, -9px, 0);
+    -webkit-transform: translate3d(0, -9px, 0);
+    transform: translate3d(0, -9px, 0)
+}
+
+.burger-button.st-2 {
+    animation: rotate-back-out .85s cubic-bezier(.2, .86, .35, 1) forwards;
+    -webkit-animation: rotate-back-out .85s cubic-bezier(.2, .86, .35, 1) forwards
+}
+
+.burger-button.st-2 i:nth-child(1) {
+    -moz-transform: translate3d(0, 10px, 0) rotate(45deg) scale(1.5);
+    -ms-transform: translate3d(0, 10px, 0) rotate(45deg) scale(1.5);
+    -webkit-transform: translate3d(0, 10px, 0) rotate(45deg) scale(1.5);
+    transform: translate3d(0, 10px, 0) rotate(45deg) scale(1.5)
+}
+
+.burger-button.st-2 i:nth-child(2) {
+    opacity: 0
+}
+
+.burger-button.st-2 i:nth-child(3) {
+    -moz-transform: translate3d(0, -10px, 0) rotate(-45deg) scale(1.5);
+    -ms-transform: translate3d(0, -10px, 0) rotate(-45deg) scale(1.5);
+    -webkit-transform: translate3d(0, -10px, 0) rotate(-45deg) scale(1.5);
+    transform: translate3d(0, -10px, 0) rotate(-45deg) scale(1.5)
+}
+
+.burger-button.st-2.hover i:nth-child(1) {
+    -moz-transform: translate3d(0, 10px, 0) rotate(50deg) scale(1.5);
+    -ms-transform: translate3d(0, 10px, 0) rotate(50deg) scale(1.5);
+    -webkit-transform: translate3d(0, 10px, 0) rotate(50deg) scale(1.5);
+    transform: translate3d(0, 10px, 0) rotate(50deg) scale(1.5)
+}
+
+.burger-button.st-2.hover i:nth-child(3) {
+    -moz-transform: translate3d(0, -10px, 0) rotate(-50deg) scale(1.5);
+    -ms-transform: translate3d(0, -10px, 0) rotate(-50deg) scale(1.5);
+    -webkit-transform: translate3d(0, -10px, 0) rotate(-50deg) scale(1.5);
+    transform: translate3d(0, -10px, 0) rotate(-50deg) scale(1.5)
+}
+.burger-button.open {
+    transform: rotate(90deg); /* Add rotation effect when open */
+}
+
+.burger-icon {
+    font-size: 30px;
+}
+
+/* Small Navbar for mobile */
+.small-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.small-navbar.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.small-navbar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+.small-navbar ul li {
+    padding: 7.5px;
+}
+
+.small-navbar ul li a {
+    text-decoration: none;
+    font-size: 24px;
+    color: white;
+    display: block;
+    padding: 10px;
+    transition: color 0.3s ease;
+}
+
+.small-navbar ul li a:hover {
+    color: #007bff;
+}
+
+.navbar.closed {
+    width: 40px; /* Navbar width when collapsed */
+}
+
+/* List styles */
+.navbar-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.navbar-list li {
+    width: 100%;
+    padding: 10px 15px;
+    text-align: left;
+}
+
+.navbar-list li a {
+    text-decoration: none;
+    font-size: 16px;
+    color: #333;
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    box-sizing: border-box; /* Ensures padding is contained within the link's boundaries */
+    transition: background-color 0.3s ease;
+}
+
+.navbar-list li a:hover {
+    background-color: #e2e6ea;
+    color: #000;
+    overflow: hidden; /* Ensures hover effect doesn't spill outside */
+}
+
+.navbar-list li a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Hide list items when navbar is closed */
+.navbar.closed .navbar-list {
+    display: none;
+}
+
+/* Toggle button styling */
+.toggle-button {
+    position: absolute;
+    top: 50%;
+    right: 0px; /* Positioned just outside the navbar */
+    width: 20px;
+    height: 40px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Add transition for transform */
+    font-size: 18px;
+}
+
+
+
+.toggle-button:hover {
+    background-color: #0056b3;
+}
+
+.toggle-button:hover {
+    background-color: #0056b3;
+}
+
+
+/* Responsive styles: adjust for smaller screens */
+@media (max-width: 1024px) {
+    .navbar {
+        width: 160px; /* Reduce the navbar width on smaller screens */
+    }
+
+    .navbar.closed {
+        width: 40px;
+    }
+
+    .navbar-list li a {
+        font-size: 14px; /* Adjust font size for smaller screens */
+    }
+}
+
+/* Hide desktop navbar on small screens */
+@media (max-width: 768px) {
+    .navbar {
+        display: none;
+    }
+
+    .mobile-navbar {
+        display: block; /* Show mobile navbar */
+    }
+}
