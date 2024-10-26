@@ -22,10 +22,12 @@ const Resume = () => {
     setProgressMessage(getProgressMessage(3)); // Set message for resume upload
   };
 
+  /*
   const handleAiImprovements = () => {
     setProgress(calculateProgress(5)); // Progress after AI improvements
     setProgressMessage(getProgressMessage(5)); // Message after AI improvements
   };
+  */
 
   const handleDownload = () => {
     if (resumeUrl) {
@@ -56,7 +58,8 @@ const Resume = () => {
     setShowModal(false); // Close the modal
 
     // Add further logic if needed, like asking if they want to save the resume
-    console.log("User finished the resume.");
+    if (isFinished)
+      console.log("User finished the resume.");
   };
 
   const handleNo = () => {
@@ -64,10 +67,12 @@ const Resume = () => {
   };
 
   // Handle progress updates from the ChatBox
+  /*
   const handleAutoMessage = () => {
     setProgress(calculateProgress(2)); // Progress after auto message
     setProgressMessage(getProgressMessage(2)); // Message after auto message
   };
+  */
 
   return (
     <div className={`resume-page ${isNavbarOpen ? 'navbar-open' : 'navbar-closed'}`}>
