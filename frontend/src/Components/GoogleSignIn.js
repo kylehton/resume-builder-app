@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
+import "./GoogleSignIn.css"
 
-const clientID = process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID;
+const clientID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+console.log("Google Client ID: ",clientID);
 
 const GoogleSignIn = () => {
+  
+  console.log(clientID)
   useEffect(() => {
     // Initialize Google Identity Services
     const initGoogleSignIn = () => {
@@ -32,9 +36,14 @@ const GoogleSignIn = () => {
   }, []);
 
   const handleCredentialResponse = (response) => {
-    console.log("Encoded JWT ID token: " + response.credential);
-    // Handle user credential response here (e.g., send it to your backend)
+    if (response.error) {
+      console.error("Error in Google Sign-In: ", response.error);
+    } else {
+      console.log("Encoded JWT ID token: " + response.credential);
+      // Handle user credential response here (e.g., send it to your backend)
+    }
   };
+  
 
   return (
     <div>

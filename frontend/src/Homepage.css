@@ -1,0 +1,20 @@
+body {
+     margin: 0;
+}
+
+
+h1 {
+     position: absolute;
+     font-size: 120px;
+     font-weight: 700;
+     left: 100px;
+     top: 70px;
+   }
+h4 {
+     position: absolute;
+     font-size: 20px;
+     font-weight: 275;
+     left: 110px;
+     top: 270px;
+     
+   }
