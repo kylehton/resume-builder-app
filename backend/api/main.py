@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
 from generate.apiCall import process_message
-
+import uvicorn
 
 app = FastAPI()
 
@@ -13,7 +13,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://resume-builder-app-rho.vercel.app/"],  # uses default local host on machine
+    allow_origins=["https://resume-builder-app-rho.vercel.app","http://localhost:3000"],  # uses default local host on machine
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,3 +87,6 @@ async def get_suggestions(user_id: int):
     # Fetch the suggestions from the database or cache
     return {"suggestions": "AI suggestions for the resume"}
 
+# Uncomment the below to run locally (do not use in Vercel's serverless functions)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
