@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from generate.apiCall import process_message  # Import the process_message function
 from pydantic import BaseModel
@@ -6,21 +6,39 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from chatAPI import process_message
 import uvicorn
+import os
 
 app = FastAPI()
-
+load_dotenv()
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://resume-builder-app-rho.vercel.app","http://localhost:3000"],  # uses default local host on machine
+    allow_origins=["https://resume-builder-frontend-nine.vercel.app/","http://localhost:3000"],  # uses default local host on machine
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
 class MessageRequest(BaseModel):
     message: str
+
+async def process_message(request: MessageRequest):
+    try:
+        # Call OpenAI API to process the message
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are going to help with resume suggestions"},
+                {"role": "user", "content": request.message}
+            ]
+        )
+        return {"response": response.choices[0].message.content}  # Return the response content
+    except Exception as e:
+        print(f"Error occured during processing of message: {e}")
+
 
 @app.post("/chat")
 async def chat(message: MessageRequest):
