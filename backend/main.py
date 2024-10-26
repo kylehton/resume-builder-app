@@ -13,7 +13,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # uses default local host on machine
+    allow_origins=["http://localhost:3000", "https://resume-builder-app-rho.vercel.app/"],  # uses default local host on machine
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
