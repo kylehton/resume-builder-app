@@ -33,7 +33,7 @@
   /* Style the auto-message differently */
   .auto-message {
     background-color: #1abac5; /* Different background color for auto-messages */
-    font-style: italic; /* Italic font style for auto-messages */
+    font-style: italic; /* Italic font style for auto-messages */ 
     padding: 10px;
     margin-top: 5px;
     margin-left: 0%;
