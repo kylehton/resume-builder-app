@@ -1,4 +1,3 @@
-import React from 'react'
 
 // ResumeLogic.js
 export const calculateProgress = (step) => {

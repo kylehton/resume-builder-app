@@ -2,11 +2,11 @@
 
 # api key
 .env
-merger.txt
 /backend/testServer.py
 
 # dependencies
 /node_modules
+/frontend/node_modules
 /.pnp
 .pnp.js
 
