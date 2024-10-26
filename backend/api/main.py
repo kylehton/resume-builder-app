@@ -4,7 +4,7 @@ from generate.apiCall import process_message  # Import the process_message funct
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
-from generate.apiCall import process_message
+from apiCall import process_message
 import uvicorn
 
 app = FastAPI()
