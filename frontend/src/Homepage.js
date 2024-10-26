@@ -1,13 +1,16 @@
-import React from "react";
+import {React} from "react";
 import GoogleSignIn from './Components/GoogleSignIn';
+import './Homepage.css';
+//import { motion } from "framer-motion"
 
-console.log(process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID);
 
 const Homepage = () => {
 
+
   return (
     <div>
-      <h1>Homepage</h1>
+      <h1>Resum-Edit</h1>
+        <h4>An AI Powered Tool to Help You Improve Your Resume</h4>
       <GoogleSignIn />
     </div>
   );
