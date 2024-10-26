@@ -1,31 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './ChatBox.css';
 
-const ChatBox = ({onResumeUpload, onAutoMessage, onDownloadClick}) => {
+const ChatBox = ({ onResumeUpload, onDownloadClick }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [autoMessageSent, setAutoMessageSent] = useState(false); // Track if auto message has been sent
 
-  useEffect(() => {
-    // Auto-message after 20 seconds
-    if (!autoMessageSent) {
-      const timer = setTimeout(() => {
-        const newMessage = { text: 'Please upload your resume to begin.', isAuto: true };
-        setMessages([...messages, newMessage]);
-        setAutoMessageSent(true); // Prevent future auto-messages
-        onAutoMessage(); // Trigger progress bar update
-      }, 5000); // 5 seconds
-
-      return () => clearTimeout(timer); // Cleanup the timer on component unmount
-    }
-  }, [autoMessageSent, messages, onAutoMessage]);
-
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim()) {
-      const newMessage = { text: input, isAuto: false }; // Regular user message
-      setMessages([...messages, newMessage]);
-      setInput("");
+      setMessages(messages => [
+        ...messages,
+        { role: "user", content: input }
+      ]);
     }
+
+    try {
+      // Send the message to the server for processing
+      const response = await fetch('http://127.0.0.1:8000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input })
+      });
+
+      const data = await response.json();
+
+      setMessages(messages => [
+        ...messages,
+        { role: "assistant", content: data.response } // Assistant message
+      ]);
+
+    } catch (error) {
+      console.error('Error generating a response:', error);
+    }
+
+    setInput(""); // Clear the input field after usage
   };
 
   const handleKeyPress = (event) => {
@@ -50,10 +57,10 @@ const ChatBox = ({onResumeUpload, onAutoMessage, onDownloadClick}) => {
       <div className="messages-container">
         {messages.map((msg, index) => (
           <div
-            className={`message ${msg.isAuto ? 'auto-message' : ''}`}
+            className={`message ${msg.role}`} // use msg.role for styling
             key={index}
           >
-            {msg.text}
+            {msg.content} {/* Correctly rendering the content */}
           </div>
         ))}
       </div>
