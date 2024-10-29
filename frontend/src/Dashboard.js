@@ -64,8 +64,12 @@ const Dashboard = () => {
     };
 
     const handleResumeClick = (url) => {
-        // Open the resume in a new tab
-        window.open(url, "_blank");
+        if (url) {
+            // Open the resume in a new tab
+            window.open(url, "_blank");
+        } else {
+            console.warn("No saved resume found to display.");
+        }
     };
 
     return (
@@ -73,7 +77,7 @@ const Dashboard = () => {
             {/* Top Navbar */}
             <nav className="top-navbar">
                 <div className="navbar-left">
-                    <h2>Resume App</h2>
+                    <Link to='/'><h2>Resume App</h2></Link>
                 </div>
                 <div className="navbar-right">
                     <Link to="/dashboard" className="nav-link active">Dashboard</Link>
@@ -88,7 +92,7 @@ const Dashboard = () => {
                 <div className="left-column">
                     <div className="card resume-improvement">
                         <h3>Let's Work on Improving Your Resume</h3>
-                        <Link to="/" className="resume-button">
+                        <Link to="/resume" className="resume-button">
                             Improve My Resume
                         </Link>
                     </div>
@@ -103,14 +107,25 @@ const Dashboard = () => {
                 <div className="right-column">
                     <h3>Your Past Resumes</h3>
                     <div className="resume-grid">
-                        {savedResumes.map(resume => (
-                            <div className="resume-card" key={resume.id} onClick={() => handleResumeClick(resume.url)} >
-                                <ResumeBox resumeUrl={resume.url} />
-                                <div className="resume-overlay">
-                                <p>{`${resume.name} - ${resume.date}`}</p>
+                        {/* Disabled for now because the new routing breaks the saving path,
+                    1. Pulling saved resumes from a database could fix this, or
+                    2. coming up with another idea that prevents dashboard from initially looking
+                    for a saved resume when a use first visits the dashboard
+                    */}
+                        {/*{/*savedResumes.length > 0 ? (
+                            savedResumes.map(resume => (
+                                <div className="resume-card" key={resume.id} onClick={() => handleResumeClick(resume.url)} >
+                                    <ResumeBox resumeUrl={resume.url} />
+                                    <div className="resume-overlay">
+                                        <p>{`${resume.name} - ${resume.date}`}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (*/}
+                            <div className="no-resumes-message">
+                                No saved resumes found. Start by uploading a resume!
                             </div>
-                        </div>
-                        ))}
+                        {/*)}*/}
                     </div>
                 </div>
             </div>
