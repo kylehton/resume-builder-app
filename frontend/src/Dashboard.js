@@ -105,6 +105,7 @@ const Dashboard = () => {
 
                 {/* Right Column */}
                 <div className="right-column">
+                <br/><br/><br/><br></br>
                     <h3>Your Past Resumes</h3>
                     <div className="resume-grid">
                         {/* Disabled for now because the new routing breaks the saving path,
