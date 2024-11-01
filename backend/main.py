@@ -58,6 +58,21 @@ async def root():
 
 
 
+async def get_openai_suggestion(section_text, section_name):
+    try:
+        # Call OpenAI API to process the message
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are going to help with resume suggestions"},
+                {"role": "user", "content": f"Improve the {section_name} section of my resume:\n\n{section_text}"}
+            ]
+        )
+        return response.choices[0].message.content  # Return the response content
+    except Exception as e:
+        print(f"Error occured during processing: {e}")
+
+
 # Uncomment the below to run locally (do not use in Vercel's serverless functions)
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
