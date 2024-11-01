@@ -12,7 +12,10 @@ load_dotenv()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://resume-builder-frontend-nine.vercel.app/resume","http://localhost:3000"],  # uses default local host on machine
+    allow_origins=[
+        "https://resume-builder-frontend-nine.vercel.app/resume", 
+        "https://resume-builder-frontend-nine.vercel.app",
+        "http://localhost:3000"],  # uses default local host on machine
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
