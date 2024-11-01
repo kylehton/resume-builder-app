@@ -23,7 +23,7 @@ body{
 
 .navbar-left h2 {
     margin: 0;
-    font-size: 25px;
+    font-size: 1em;
     font-weight: bold;
     color: black; /* Black text */
 }
