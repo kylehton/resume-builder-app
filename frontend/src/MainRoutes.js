@@ -11,7 +11,7 @@ const MainRoutes = () => {
             <NavbarProvider>
             <Navbar />
             <Routes>
-              <Route exact path='/' element={<Resume />}/>
+              <Route exact path='/resume' element={<Resume />}/>
             </Routes>
           </NavbarProvider>
       
