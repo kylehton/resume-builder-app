@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import "./GoogleSignIn.css"
 
+const clientID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const GoogleSignIn = () => {
   
+  console.log(clientID)
   useEffect(() => {
     // Initialize Google Identity Services
     const initGoogleSignIn = () => {
