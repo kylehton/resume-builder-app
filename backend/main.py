@@ -63,7 +63,7 @@ def process_message(request_message: str):
                 {"role": "user", "content": request_message}
             ]
         )
-        return {"response": response.choices[0].message.content}  # Return the response content
+        return response.choices[0].message.content  # Return the response content
     except Exception as e:
         print(f"Error occurred during processing of message: {e}")
         return {"error": str(e)}
