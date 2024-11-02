@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import uvicorn
 import os
+from .celery_app import celery
 
 app = FastAPI()
 load_dotenv()
@@ -27,6 +28,7 @@ client = OpenAI(api_key=api_key)
 class MessageRequest(BaseModel):
     message: str
 
+@celery.task
 async def process_message(request: MessageRequest):
     try:
         # Call OpenAI API to process the message
