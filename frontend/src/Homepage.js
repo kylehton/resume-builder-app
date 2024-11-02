@@ -18,7 +18,6 @@ const Homepage = () => {
           <Link to="/" className="nav-link">Login</Link>
           <Link to="/" className="nav-link"></Link>
 
-          <Link to="*" className="nav-link"><GoogleSignIn/></Link>
         </div>
       </nav>
       
@@ -29,13 +28,14 @@ const Homepage = () => {
         <div className="text-content">
           <h1>Resume-Edit</h1>
           <h4>An AI Powered Tool to Help You Improve Your Resume</h4>
-          <button className="cta-button">Get Started</button>
+          {/*<Link to="/dashboard"><button className="cta-button">Get Started</button></Link>*/}
+          <GoogleSignIn/>
         </div>
 
         {/* Image Container */}
         <div className="image-container">
           {/* Replace this src with your resume image URL */}
-          <img src="YOUR_RESUME_IMAGE_URL_HERE" alt="Resume Preview" className="resume-image" />
+          <img src="https://ideogram.ai/assets/image/lossless/response/ipQaSxKATbSQtvLs6MwGtA" alt="Resume Preview" className="resume-image" />
         </div>
       </div>
 
