@@ -27,6 +27,7 @@ celery.conf.update(
     enable_utc=True,
 )
 
+redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
