@@ -6,8 +6,7 @@ from openai import OpenAI
 import uvicorn
 import os
 import redis
-import celery
-
+from celery import Celery
 
 app = FastAPI()
 load_dotenv()
