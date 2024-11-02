@@ -5,14 +5,29 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import uvicorn
 import os
-from .celery_app import celery
 import redis
+import celery
 
 
 app = FastAPI()
 load_dotenv()
 
-redis_key = os.getenv('REDIS_KEY')
+redisUrl=os.getenv("REDIS_URL")
+
+celery = Celery(
+     "tasks",
+     broker=(redisUrl),  
+     backend=(redisUrl)
+)
+
+celery.conf.update(
+    task_serializer="json",
+    result_serializer="json",
+    accept_content=["json"],
+    timezone="UTC",
+    enable_utc=True,
+)
+
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
