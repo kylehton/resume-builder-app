@@ -35,7 +35,9 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
         });
 
         const data = await response.json();
+        console.log("data", data)
         const taskId = data.task_id;
+        console.log("task id", taskId)
         setInput(""); // Clear the input field
 
         // Polling for task completion
@@ -43,16 +45,20 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
         while (!result) {
             const resultResponse = await fetch(`https://resume-builder-backend-mu.vercel.app/result/${taskId}`);
             const resultData = await resultResponse.json();
+            console.log("result:", resultData.result)
 
-            if (resultData.status === "Completed") {
+            if (resultData.status === "SUCCESS") { // Check for 'SUCCESS'
                 result = resultData.result;
                 setMessages(messages => [
                     ...messages,
                     { role: "assistant", content: result } // Assistant message with completed response
                 ]);
-            } else if (resultData.status === "Failed") {
+            } else if (resultData.status === "FAILURE") { // Check for 'FAILURE'
                 console.error("Task failed:", resultData.error);
                 break;
+            } else {
+                // Still pending, wait and check again
+                console.log("Task is still processing...");
             }
             await new Promise((resolve) => setTimeout(resolve, 2000)); // Poll every 2 seconds
         }
@@ -60,7 +66,8 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
     } catch (error) {
         console.error('Error generating a response:', error);
     }
-  };
+};
+
 
 
   const handleKeyPress = (event) => {
