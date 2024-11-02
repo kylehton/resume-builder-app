@@ -20,32 +20,48 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
 
   const handleSend = async () => {
     if (input.trim()) {
-      setMessages(messages => [
-        ...messages,
-        { role: "user", content: input }
-      ]);
+        setMessages(messages => [
+            ...messages,
+            { role: "user", content: input }
+        ]);
     }
 
     try {
-      // Send the message to the server for processing
-      const response = await fetch('https://resume-builder-backend-mu.vercel.app/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
-      });
+        // Send the message to the server to initiate processing
+        const response = await fetch('https://resume-builder-backend-mu.vercel.app/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: input })
+        });
 
-      const data = await response.json();
-      setMessages(messages => [
-        ...messages,
-        { role: "assistant", content: data.response } // Assistant message
-      ]);
+        const data = await response.json();
+        const taskId = data.task_id;
+        setInput(""); // Clear the input field
+
+        // Polling for task completion
+        let result = null;
+        while (!result) {
+            const resultResponse = await fetch(`https://resume-builder-backend-mu.vercel.app/result/${taskId}`);
+            const resultData = await resultResponse.json();
+
+            if (resultData.status === "Completed") {
+                result = resultData.result;
+                setMessages(messages => [
+                    ...messages,
+                    { role: "assistant", content: result } // Assistant message with completed response
+                ]);
+            } else if (resultData.status === "Failed") {
+                console.error("Task failed:", resultData.error);
+                break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 2000)); // Poll every 2 seconds
+        }
 
     } catch (error) {
-      console.error('Error generating a response:', error);
+        console.error('Error generating a response:', error);
     }
-
-    setInput(""); // Clear the input field after usage
   };
+
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
