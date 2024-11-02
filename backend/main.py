@@ -6,9 +6,20 @@ from openai import OpenAI
 import uvicorn
 import os
 from .celery_app import celery
+import redis
+
 
 app = FastAPI()
 load_dotenv()
+
+redis_key = os.getenv('REDIS_KEY')
+api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=api_key)
+
+r = redis.Redis(
+  host='redis-17933.c289.us-west-1-2.ec2.redns.redis-cloud.com',
+  port=17933,
+  password=redis_key)
 
 
 app.add_middleware(
@@ -22,8 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=api_key)
+
 
 class MessageRequest(BaseModel):
     message: str

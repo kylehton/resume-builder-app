@@ -1,10 +1,15 @@
 from celery import Celery
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+redisUrl=os.getenv("REDIS_URL")
 
 celery = Celery(
      "tasks",
-     broker=os.getenv("REDIS_URL", "redis://localhost:6379/0"),  # Update this URL if Redis is running elsewhere
-     backend=os.getenv("REDIS_URL", "redis://localhost:6379/0")
+     broker=(redisUrl),  
+     backend=(redisUrl)
 )
 
 celery.conf.update(
