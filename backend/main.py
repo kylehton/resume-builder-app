@@ -82,12 +82,16 @@ def chat(message: MessageRequest):
 @app.get("/result/{task_id}")
 def get_result(task_id: str):
     result = process_message.AsyncResult(task_id)
+    print(f"Task ID: {task_id}, Status: {result.state}")  # Log task state
     if result.state == 'PENDING':
-        return {"status": result.state}  # Task is still processing
+        return {"status": result.state}
     elif result.state == 'FAILURE':
-        return {"status": result.state, "error": str(result.info)}  # Task failed
+        print(f"Task Failed: {result.info}")  # Log error info
+        return {"status": result.state, "error": str(result.info)}
     else:
-        return {"status": result.state, "result": result.result}  # Task completed successfully
+        print(f"Task Completed: {result.result}")  # Log result
+        return {"status": result.state, "result": result.result}
+
 
 # Initial server screen
 @app.get("/")

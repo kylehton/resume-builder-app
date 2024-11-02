@@ -35,9 +35,9 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
         });
 
         const data = await response.json();
-        console.log("data", data)
+        console.log("data", data);
         const taskId = data.task_id;
-        console.log("task id", taskId)
+        console.log("task id", taskId);
         setInput(""); // Clear the input field
 
         // Polling for task completion
@@ -45,16 +45,30 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
         while (!result) {
             const resultResponse = await fetch(`https://resume-builder-backend-mu.vercel.app/result/${taskId}`);
             const resultData = await resultResponse.json();
-            console.log("result:", resultData.result)
+            console.log("result:", resultData.result);
 
             if (resultData.status === "SUCCESS") { // Check for 'SUCCESS'
                 result = resultData.result;
-                setMessages(messages => [
-                    ...messages,
-                    { role: "assistant", content: result } // Assistant message with completed response
-                ]);
+
+                // Ensure result is a string before adding to messages
+                if (typeof result === "string") {
+                    setMessages(messages => [
+                        ...messages,
+                        { role: "assistant", content: result } // Assistant message with completed response
+                    ]);
+                } else {
+                    console.error("Expected a string response, but received:", result);
+                    setMessages(messages => [
+                        ...messages,
+                        { role: "assistant", content: "Received an unexpected response." }
+                    ]);
+                }
             } else if (resultData.status === "FAILURE") { // Check for 'FAILURE'
                 console.error("Task failed:", resultData.error);
+                setMessages(messages => [
+                    ...messages,
+                    { role: "assistant", content: "The task has failed." }
+                ]);
                 break;
             } else {
                 // Still pending, wait and check again
@@ -67,6 +81,7 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
         console.error('Error generating a response:', error);
     }
 };
+
 
 
 
