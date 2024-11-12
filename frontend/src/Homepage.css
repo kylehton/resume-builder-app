@@ -1,7 +1,11 @@
 body {
      margin: 0;
-     background: rgb(150,0,221);
-     background: linear-gradient(266deg, rgba(150,0,221,0.9990371148459384) 0%, rgba(250,0,255,1) 100%);
+    background: linear-gradient(to right, rgba(187, 0, 255, 0.999), rgb(0, 191, 255));
+    /* background: linear-gradient(to right, #fb00ff,#e100ff , #00b3ff, #004cff, #0d00ff);*/
+     background-size: 200% 200%;
+     -webkit-animation: Slide 15s ease forwards infinite;
+      -moz-animation: Slide 15s ease forwards infinite;
+      animation: Slide 15s ease forwards infinite;
    }
    
    .homepage-container {
@@ -129,3 +133,37 @@ body {
      }
    }
 
+
+   @keyframes Slide {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 51%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  @-webkit-keyframes Slide {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 51%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  @-moz-keyframes Slide {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 51%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
