@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from 'react-router-dom';
 import "./Dashboard.css";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import ResumeBox from "./Components/ResumeBox";
+import PDFViewer from "./Components/PDFViewer";
 
 ChartJS.register(
     CategoryScale,
@@ -13,14 +13,7 @@ ChartJS.register(
     Tooltip
 );
 
-const Dashboard = () => {
-    const [savedResumes, setSavedResumes] = useState([]);
-
-    useEffect(() => {
-        // Get saved resumes from Local Storage when the dashboard Loads
-        const resumes = JSON.parse(localStorage.getItem('savedResumes')) || [];
-        setSavedResumes(resumes);
-    }, []);
+const Dashboard = ({loadResumes, resumeList}) => {
 
     // Chart data
     const data = {
@@ -63,10 +56,12 @@ const Dashboard = () => {
         },
     };
 
-    const handleResumeClick = (url) => {
-        if (url) {
+    const handleResumeClick = (resumeBlob) => {
+        if (resumeBlob) {
             // Open the resume in a new tab
+            const url = URL.createObjectURL(new Blob([new Uint8Array(resumeBlob)], { type: 'application/pdf'}));
             window.open(url, "_blank");
+            URL.revokeObjectURL(url);
         } else {
             console.warn("No saved resume found to display.");
         }
@@ -106,27 +101,31 @@ const Dashboard = () => {
                 {/* Right Column */}
                 <div className="right-column">
                 <br/><br/><br/><br></br>
-                    <h3>Your Past Resumes</h3>
-                    <div className="resume-grid">
-                        {/* Disabled for now because the new routing breaks the saving path,
-                    1. Pulling saved resumes from a database could fix this, or
-                    2. coming up with another idea that prevents dashboard from initially looking
-                    for a saved resume when a use first visits the dashboard
-                    */}
-                        {/*{/*savedResumes.length > 0 ? (
-                            savedResumes.map(resume => (
-                                <div className="resume-card" key={resume.id} onClick={() => handleResumeClick(resume.url)} >
-                                    <ResumeBox resumeUrl={resume.url} />
-                                    <div className="resume-overlay">
-                                        <p>{`${resume.name} - ${resume.date}`}</p>
+                    <div className="center-content">
+                        <h3>Your Past Resumes</h3>
+                        <div className="resume-grid">
+                            {resumeList.length > 0 ? (
+                                resumeList
+                                    .filter((resume) => resume.pdfBlob && resume.pdfBlob.data) // Filter resumes with non-empty pdfBlob
+                                    .map((resume) => (
+                                    <div  key={resume.id} onClick={() => handleResumeClick(resume.pdfBlob.data)}>
+                                        <div className="resume-preview-container">
+                                            {resume?.pdfBlob?.data && (
+                                                
+                                                <PDFViewer resumeBlob={resume.pdfBlob.data} />
+                                            )}
+                                            <div className="resume-overlay">
+                                                <p>{`${resume.pdfName} - ${resume.dateUploaded}`}</p>
+                                            </div>
+                                        </div>
                                     </div>
+                                ))
+                            ) : (
+                                <div className="no-resumes-message">
+                                    No saved resumes found. Start by uploading a resume!
                                 </div>
-                            ))
-                        ) : (*/}
-                            <div className="no-resumes-message">
-                                No saved resumes found. Start by uploading a resume!
-                            </div>
-                        {/*)}*/}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

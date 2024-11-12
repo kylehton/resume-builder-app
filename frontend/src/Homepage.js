@@ -7,11 +7,12 @@ const Homepage = () => {
   return (
     <div className="homepage-container">
       {/* Top Navbar */}
+
       <nav className="top-navbar">
         <div className="navbar-left">
           <Link to='/' className='active'><h2>Resume App</h2></Link>
         </div>
-        
+
         <div className="navbar-right">
           <Link to="/dashboard" className="nav-link active">Dashboard</Link>
           <Link to="/profile" className="nav-link">User Settings</Link>
@@ -20,16 +21,15 @@ const Homepage = () => {
 
         </div>
       </nav>
-      
+
 
       {/* Main Content */}
       <div className="main-content">
-      
         <div className="text-content">
           <h1>Resume-Edit</h1>
           <h4>An AI Powered Tool to Help You Improve Your Resume</h4>
           {/*<Link to="/dashboard"><button className="cta-button">Get Started</button></Link>*/}
-          <GoogleSignIn/>
+          <GoogleSignIn />
         </div>
 
         {/* Image Container */}
@@ -39,7 +39,7 @@ const Homepage = () => {
         </div>
       </div>
 
-      
+
     </div>
   );
 };
