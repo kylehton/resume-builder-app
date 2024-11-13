@@ -59,6 +59,12 @@ body{
     padding-left: 18%;
 }
 
+.center-content {
+    max-width: 800px; /* Limit the max width to keep it visually balanced */
+    width: 100%; /* Allows responsiveness */
+    text-align: center; /* Center-aligns the "Your Past Resumes" header */
+  }
+
 /* Left Column */
 .left-column {
     padding-top: 5%;
@@ -72,6 +78,7 @@ body{
     width: 45%;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 .right-column .h3{
     text-align: right!important;
@@ -113,25 +120,18 @@ body{
 /* Past Resumes */
 .resume-grid {
     display: flex;
-    flex-direction: column; /* Changed to column for vertical alignment */  
-}
+    flex-wrap: wrap;
+    gap: 20px; /* Adds space between resume cards */
+    justify-content: center; /* Centers the resume cards within the grid */
+  }
 
-.resume-card {
-    max-width: 33%; /* Ensure the container takes up the full width */
-    width: 15.9%;
-    height: auto; /* Set height to auto to scale dynamically */
-    max-height: 33vh; /* Ensure it doesn't exceed the viewport height */
-    overflow: hidden; /* Hide content that overflows the box */
-    position: absolute; /* For controlling child elements */
+  .resume-card {
+    position: relative;
+    width: 100%; /* Full width for smaller screens */
+    max-width: 300px; /* Limits width for larger screens */
+    overflow: hidden;
     cursor: pointer;
-    /*border: 1px solid #ccc; /* Optional border */
-    display: flex;
-    align-items: center;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    transition: background-color 0.3 ease;
-    clip-path: inset(0 19% 0 0);
-}/* Limit the resume display box to a specific height */
+  }/* Limit the resume display box to a specific height */
 /*.resume-card {
     position: relative;
     height: 325px;  /* Ensure height stays fixed */
@@ -168,21 +168,23 @@ body{
 }
 
 .resume-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    padding: 10px;
     position: absolute;
     bottom: 0;
-    left: 3.5%;
-    width: 86.5%;
-    font-weight: bold;
-    /*border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 10px;*/
-}
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+.resume-preview-container {
+    position: relative;
+  }
 
-.resume-overlay p {
-    padding-left: 8.5%;
-}
+  .resume-overlay p {
+    margin: 0;
+    font-size: 0.9em;
+  }
 
 .resume-overlay a {
     color: #fff; /* Make any hyperlinks inside the overlay white */
