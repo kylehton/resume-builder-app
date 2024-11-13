@@ -14,7 +14,7 @@ load_dotenv()
 redisUrl = os.getenv("REDIS_URL")
 
 celery = Celery(
-    "tasks",
+    "main",
     broker=redisUrl,  
     backend=redisUrl
 )
