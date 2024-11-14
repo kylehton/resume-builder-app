@@ -1,1 +1,1 @@
-worker: celery -A main.celery worker --loglevel=info
+worker: celery -A backend.main.celery worker --loglevel=info
