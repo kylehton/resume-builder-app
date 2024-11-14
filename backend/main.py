@@ -11,7 +11,7 @@ import asyncio
 app = FastAPI()
 load_dotenv()
 
-redisUrl = os.getenv("REDIS_URL")
+redisUrl = os.getenv("REDISCLOUD_URL")
 
 celery = Celery(
     "main",
