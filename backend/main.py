@@ -27,7 +27,6 @@ celery.conf.update(
     enable_utc=True,
 )
 
-celery.autodiscover_tasks(['main'])  # Ensures tasks in 'main' are discovered
 
 redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY')
@@ -50,7 +49,7 @@ app.add_middleware(
 class MessageRequest(BaseModel):
     message: str
 
-@celery.task
+@celery.task(name="main.process_message")
 def process_message(request_message: str):
     try:
         response = client.chat.completions.create(
