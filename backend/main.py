@@ -31,11 +31,8 @@ redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
-r = redis.Redis(
-    host='redis-17933.c289.us-west-1-2.ec2.redns.redis-cloud.com',
-    port=17933,
-    password=redis_key
-)
+r = redis.from_url(redisUrl)
+
 
 app.add_middleware(
     CORSMiddleware,
