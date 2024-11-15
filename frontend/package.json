@@ -36,6 +36,7 @@
     "babel-eslint": "^10.1.0",
     "chart.js": "^4.4.5",
     "core-js": "^3.38.1",
+    "dotenv": "^16.4.5",
     "framer-motion": "^11.11.10",
     "pdfjs-dist": "^4.7.76",
     "react": "^18.3.1",
