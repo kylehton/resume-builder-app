@@ -96,7 +96,7 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
       const fileURL = URL.createObjectURL(file);
-      onResumeUpload(fileURL); // Pass the file URL to the parent component 
+      onResumeUpload(fileURL, file.name); // Pass the file URL to the parent component, added file.name 11/14
     } else {
       alert("Please upload a valid PDF file.");
     }
