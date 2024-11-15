@@ -1,93 +1,54 @@
-# Contributing to the resume app
-## I. Initial Steup
+# Resume Builder App README
 
-### 1. Fork this Repo to Your Github Account
-- Click on the Fork button
-<br/>
+Hello all, this is our application for the PM Accelerator Internship/Bootcamp.
 
-### 2. Configure the application to work on your IDE of choice.
-- For VS Code, you can clone the forked repository to your editor.
-- After cloning the repository, go through the package.json files dependencies and ensure they are all installed on your application.
-- Running npm install will help build the node_modules libraries needed to run the application.
-- Run Npm Start in your terminal to ensure the application runs,
+It is a Resume Builder App, that intakes a resume as a PDF, vectorizes and embeds it, and uses 
+Retrieval-Augmented Generation to gather the appropriate section, in which it is sent into a GPT,
+improving it through relevant keywords and phrases, and inserted back into a basic resume template.
+The version can then be downloaded as a PDF format.
 
-### 3. Adding New commits
-- Feel free to add any new features and edits to the forked repository, it's like a safe sandbox to experiment.
-- Before pushing changes, please ensure that your features or add-on's work completely, or at least don't create errors or crashes when running the applicaiton.
-- Once finishing a feature or section, push it to the forked repo and let me know it's ready to be rolled out. I will then merge your forked branch into the main branch.
+Both the front-end React App and back-end FastAPI server are deployed through vercel
+Front: https://resume-builder-frontend-nine.vercel.app/
+Back-end/Server: https://resume-builder-backend-mu.vercel.app/
 
-### 4. Troubleshooting
-- If there are any issues getting this to work on your own computer, feel free to DM me 
+We are using Heroku, alongside Redis to host an asynchronous task worker with a task queue.
 
 
 
-# Getting Started with Create React App
+# Backend Process
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Installation Manager: pip install ...
 
-## Available Scripts
+Dependencies: fastapi==0.115.2, uvicorn==0.32.0, python-dotenv==1.0.1, openai==1.52.2, 
+pydantic==2.9.2, openai==1.52.2, pdfplumber==0.11.4, fpdf==1.7.2, celery==5.4.0
+redis==5.2.0
 
-In the project directory, you can run:
+Additional Comment - requirements.txt in root directory is for Heroku usage, while the one in 
+'/backend' directory is for Vercel back-end deployment
 
-### `npm start`
+- Uses Celery worker to run tasks that are added to a queue; currently uses the Free tier, so the 
+worker goes to sleep after 30 minutes (new task added to queue will wake it up, but will be 
+presented with a small delay)
+- Leverages OpenAI API GPT-3.5-Turbo to get resume suggestions from text via a chatbot integration,
+in which it edits the resume section for us as plain text
+- new section is then vectorized and replaces its previous section within the vector database
+- retrieves and stores embeddings of sections of a resume for usage in API call and suggestion 
+changes
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
 
-### `npm test`
+# Frontend Process
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Installation Manager: npm install ...
 
-### `npm run build`
+Dependencies: 
+Material UI, Google OAuth, Framer Motion, PDFjs,
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Homepage:
+- Contains Google Sign In feature, User Google ID used for database storage key for individualized
+collection containment
+- After Sign-in, routes to a Dashboard page, with the main component being a button to route to 
+resume customization section as well as previous resume saves
+- Resume customization section contains a chatbox with a virtual assistant as well as a rendered
+model of the resume. Render updates based on suggestion from chatbot. 
+- Resume rendering is saved through a SQL database
