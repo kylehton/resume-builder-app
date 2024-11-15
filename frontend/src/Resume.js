@@ -5,6 +5,7 @@ import ResumeBox from './Components/ResumeBox';
 import { NavbarContext } from './NavbarContext';
 import { calculateProgress, getProgressMessage } from './BusinessLogic/ResumeLogic';
 import ConfirmationModal from './Components/ConfirmationalModal';
+import Datasource from './BusinessLogic/Datasource';
 
 import './Resume.css';
 
@@ -15,11 +16,28 @@ const Resume = () => {
     const [progressMessage, setProgressMessage] = useState(getProgressMessage(1)); // Progress message state
     const [showModal, setShowModal] = useState(false); // Modal state
     const [isFinished, setIsFinished] = useState(false); // Track whether the user is done
+    const [pdfName, setPdfName] = useState("resume.pdf"); // Tracks the name of the file 11/14
+    const [pdfUserId, setPdfUserId] = useState(1);
+    const [dateUploaded, setDateUploaded] = useState("11/14/2024");
+    const [pdfBlob, setPdfBlob] = useState(null);
+    const currentDate = new Date().toLocaleDateString('en-us');
 
-  const handleResumeUpload = (url) => {
+  const handleResumeUpload = async (url, pdfName) => {
     setResumeUrl(url); // Update the resume URL in state
+    setPdfName(pdfName); // Store the actual file name 11/14
+    setPdfUserId(1); // needs to be changed later when we have user management 11/14
+    setDateUploaded(currentDate);
     setProgress(calculateProgress(3)); // Update progress for resume upload
     setProgressMessage(getProgressMessage(3)); // Set message for resume upload
+
+    // Fetch and store the blob changed on 11/14
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      setPdfBlob(blob); // Store the blob directly
+    } catch (error) {
+        console.error("Error fetching blob:", error);
+    }
   };
 
   /*
@@ -29,12 +47,37 @@ const Resume = () => {
   };
   */
 
+  // now works 11/14
+  const saveResumeToDB = async () => {
+
+    try {
+      const formData = new FormData();
+      formData.append('pdfUserId', pdfUserId);
+      formData.append('pdfName', pdfName);
+      formData.append('dateUploaded', dateUploaded);
+      formData.append('pdfBlob', pdfBlob, pdfName); // Attach the blob as a file
+
+      await Datasource.post('/upload', formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          }
+      });
+      console.log("Resume saved to DB successfully");
+      console.log(pdfUserId);
+      console.log(pdfName);
+      console.log(dateUploaded);
+      console.log(pdfBlob);
+    } catch (error) {
+      console.error("Failed to save resume to DB:", error);
+    }
+  };
+
   const handleDownload = () => {
     if (resumeUrl) {
         // Programmatic download logic
         const link = document.createElement('a');
         link.href = resumeUrl;
-        link.download = 'resume.pdf'; // Set a default download filename
+        link.download = pdfName; // Set the actual filename 11/14
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -53,10 +96,10 @@ const Resume = () => {
   // Handlers for modal buttons
   const handleModalClose = () => setShowModal(false); // Close modal
 
-  const handleYes = () => {
+  const handleYes = async () => {
     setIsFinished(true); // Mark the resume as finished
     setShowModal(false); // Close the modal
-
+    await saveResumeToDB();
     // Add further logic if needed, like asking if they want to save the resume
     if (isFinished)
       console.log("User finished the resume.");
@@ -88,7 +131,7 @@ const Resume = () => {
       <ResumeBox resumeUrl={resumeUrl} />
 
       {/* Show the modal if the user has downloaded the resume */}
-      {showModal && <ConfirmationModal onClose={handleModalClose} onYes={handleYes} onNo={handleNo} resumeUrl={resumeUrl} />}
+      {showModal && <ConfirmationModal onClose={handleModalClose} onYes={handleYes} onNo={handleNo} resumeUrl={resumeUrl} pdfName={pdfName} saveResumeToDB={saveResumeToDB} />}
     </div>
   );
 };

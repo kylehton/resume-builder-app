@@ -2,29 +2,17 @@ import React from 'react';
 import './ConfirmationalModal.css';
 import { useNavigate } from 'react-router-dom';
 
-const ConfirmationModal = ({ onClose, onNo, resumeUrl }) => {
+const ConfirmationModal = ({ onClose, onNo, resumeUrl, pdfName, saveResumeToDB }) => {
   const navigate = useNavigate();
-
-  const handleYesClick = () => {
-    // Get existing saved resumes or initialize an empty array
-    //let savedResumes = JSON.parse(localStorage.getItem('savedResumes')) || [];
-
-    // Clear existing saved resumes
-    localStorage.removeItem('savedResumes');
-
-    // Add the current resume details (URL, timestamp, and name) 
-    const currentDate = new Date().toLocaleDateString('en-US');
-    const newResume= [{
-      url: resumeUrl,
-      name: `Resume 1`,
-      date: currentDate
-    }];
-
-    // Save the updated array back to Local Storage
-    localStorage.setItem('savedResumes', JSON.stringify(newResume));
-
-    // Navigate to the /dashboard for the current user when the user clicks "Yes"
-    navigate('/dashboard');
+ // changed handleYesClick 11/14, doesnt need local storage anymore
+  const handleYesClick = async () => {
+    // Try accessing the saving of resume to the database.
+    try{
+      await saveResumeToDB();
+      navigate('/dashboard');
+    } catch (error) {
+      console.error("Error saving resume:", error);
+    }
   };
 
   return (
