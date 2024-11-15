@@ -8,17 +8,19 @@ import redis
 from celery import Celery
 import asyncio
 
-app = FastAPI()
+app = FastAPI() # creates instance of FastAPI
 load_dotenv()
 
 redisUrl = os.getenv("REDISCLOUD_URL")
 
+# creates instance of Celery 
 celery = Celery(
     "tasks",
     broker=redisUrl,
     backend=redisUrl
 )
 
+# Celery configuration
 celery.conf.update(
     task_serializer="json",
     result_serializer="json",
@@ -27,13 +29,15 @@ celery.conf.update(
     enable_utc=True,
 )
 
-
+# Load environment variables
 redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
+# Connect to Redis via Heroku-Redis add-on
 r = redis.from_url(redisUrl)
 
+# Middleware to allow CORS connection from frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -46,9 +50,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Define the request body for the chat endpoint
 class MessageRequest(BaseModel):
     message: str
 
+# Create endpoint for API call to OpenAI and run it as a Celery task
 @celery.task(name="main.process_message")
 def process_message(request_message: str):
     try:
@@ -64,18 +70,20 @@ def process_message(request_message: str):
         print(f"Error occurred during processing of message: {e}")
         return {"error": str(e)}
 
+# Create endpoint for chat API
 @app.post("/chat")
 def chat(message: MessageRequest):
     try:
-        task = process_message.delay(message.message)
+        task = process_message.delay(message.message) # Use .delay() to run the task asynchronously
         return {"task_id": task.id}
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error with OpenAI API")
 
+# Create endpoint to get the result of the chat API for state logging
 @app.get("/result/{task_id}")
 def get_result(task_id: str):
-    result = celery.AsyncResult(task_id)  # Use celery.AsyncResult instead
+    result = celery.AsyncResult(task_id)  # Get the result of the task
     print(f"Task ID: {task_id}, Status: {result.state}")
     if result.state == 'PENDING':
         return {"status": result.state}

@@ -4,6 +4,8 @@ import "./GoogleSignIn.css";
 
   const GoogleSignIn = () => {
     const clientID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    // unable to read from .env file, so manually insert the clientID when using localhost, and 
+    // revert back to this when pushing onto main branch for deployment
     const navigate = useNavigate();
   
     useEffect(() => {
