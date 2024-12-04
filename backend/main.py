@@ -6,7 +6,6 @@ from openai import OpenAI
 import os
 import redis
 from celery import Celery
-import asyncio
 
 app = FastAPI() # creates instance of FastAPI
 load_dotenv()
@@ -31,7 +30,7 @@ celery.conf.update(
 
 # Load environment variables
 redis_key = os.getenv('REDIS_KEY')
-api_key = os.getenv('OPENAI_API_KEY')
+api_key = os.getenv('OPENAI_API_KEY') # into vercel here
 client = OpenAI(api_key=api_key)
 
 # Connect to Redis via Heroku-Redis add-on
@@ -98,15 +97,3 @@ def get_result(task_id: str):
 async def root():
     return {"message": "testing access"}
 
-async def get_openai_suggestion(section_text, section_name):
-    try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are going to help with resume suggestions"},
-                {"role": "user", "content": f"Improve the {section_name} section of my resume:\n\n{section_text}"}
-            ]
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        print(f"Error occurred during processing: {e}")
