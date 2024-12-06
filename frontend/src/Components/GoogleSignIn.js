@@ -49,7 +49,7 @@ import "./GoogleSignIn.css";
         const payload = JSON.parse(atob((response.credential).split(".")[1]));
         console.log("User ID:", payload["sub"]);// accesses the user ID from token
 
-        const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieve_oken', {
+        const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieve_token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id_token : payload['sub'] }),

@@ -84,6 +84,9 @@ class GoogleToken(BaseModel):
 @app.post("/retrieve_token")
 def retrieve_token(id_token: GoogleToken):
     try:
+        resumeDatabase = mongoClient["PlainTextResumeStorage"]
+        resume_collection = resumeDatabase["resume"]
+        resume_collection.update_one({"_id": id_token.id_token}, {"resume": "Test Run 1"}, upsert=True)
         return id_token.id_token        
     except Exception as e:
         raise HTTPException(status_code=500, detail= f"Error with Google Token: {e}")
