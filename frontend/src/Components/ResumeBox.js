@@ -139,17 +139,17 @@ const ResumeBox = ({ resumeUrl, pdfBlob, pdfName }) => {
         // Define margins, header, and footer areas
         const marginTop = 20; // Top margin
         const marginBottom = 20; // Bottom margin
-        const marginLeft = 60; // Left margin
+        const marginLeft = 50; // Left margin
         const marginRight = 20; // Right margin
-        const headerHeight = 60; // Height for the header area
+        const headerHeight = 20; // Height for the header area
         const footerHeight = 20; // Height for the footer area
         const contentHeight = canvas.height - marginTop - marginBottom - headerHeight - footerHeight;
   
         // Set up text rendering parameters
-        const lineHeight = 14; // Space between lines
-        const headerFontSize = 16; // Font size for header
+        const lineHeight = 8; // Space between lines, more specifically the space between headers and titles
+        const headerFontSize = 14; // Font size for header
         const bodyFontSize = 12; // Font size for body text
-        const charLimit = 125; // Maximum characters per line
+        const charLimit = 127; // Maximum characters per line
         const maxWidth = scaledWidth - marginLeft - marginRight; // Max width for wrapped text
         let yPosition = marginTop + headerHeight;
   
@@ -167,7 +167,7 @@ const ResumeBox = ({ resumeUrl, pdfBlob, pdfName }) => {
             }
   
             ctx.fillText(line, x, y);
-            y += lineHeight;
+            y += lineHeight + 8; // sets the spacing for drop down next lines like the professional summary
   
             remainingText = remainingText.slice(line.length).trim();
   
@@ -183,8 +183,8 @@ const ResumeBox = ({ resumeUrl, pdfBlob, pdfName }) => {
         // Render header (e.g., document title)
         context.font = `bold ${headerFontSize}px Arial`;
         context.fillStyle = 'blue';
-        wrapText(context, 'New AI Generated Resume', marginLeft, yPosition, maxWidth, lineHeight);
-        yPosition += lineHeight * 2; // Extra spacing after header
+        wrapText(context,'Resume App AI Generated Resume', marginLeft, yPosition, maxWidth, lineHeight);
+        yPosition += lineHeight * 3; // Extra spacing after header
   
         // Render the main content (body text)
         context.font = `${bodyFontSize}px Arial`;
@@ -195,7 +195,7 @@ const ResumeBox = ({ resumeUrl, pdfBlob, pdfName }) => {
           yPosition = wrapText(context, paragraph, marginLeft, yPosition, maxWidth, lineHeight);
   
           // Add spacing between paragraphs
-          yPosition += lineHeight;
+          yPosition += lineHeight -1.5;
         });
   
         // Render footer
