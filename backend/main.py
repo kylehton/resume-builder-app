@@ -24,17 +24,20 @@ redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY') 
 openAIClient = OpenAI(api_key=api_key)
 
-global mongoClient
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        global mongoClient
         # Create MongoDB connection
         uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
         mongoClient = MongoClient(uri, server_api=ServerApi('1'))
         # Test the connection with a ping
         mongoClient.admin.command('ping')
         print("MongoDB connection established and pinged successfully!")
+        app.state.mongoClient = mongoClient  # Store client in app state
+
         yield  # Proceed with app lifespan
     except Exception as e:
         print(f"Error occurred during MongoDB connection: {e}")
@@ -87,6 +90,7 @@ class GoogleToken(BaseModel):
 @app.post("/retrieve_token")
 def retrieve_token(id_token: GoogleToken):
     try:
+        mongoClient = app.state.mongoClient
         resumeDatabase = mongoClient["PlainTextResumeStorage"]
         resume_collection = resumeDatabase["resume"]
         try:
