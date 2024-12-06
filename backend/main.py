@@ -24,9 +24,10 @@ redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY') 
 openAIClient = OpenAI(api_key=api_key)
 
+global mongoClient
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global mongoClient
     try:
         # Create MongoDB connection
         uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
@@ -89,7 +90,8 @@ def retrieve_token(id_token: GoogleToken):
         resumeDatabase = mongoClient["PlainTextResumeStorage"]
         resume_collection = resumeDatabase["resume"]
         try:
-            resume_collection.update_one({"_id": id_token.id_token}, {"resume": "Test Run 1"}, upsert=True)
+            standard_data = {"resume" : "Initial Insert"}
+            resume_collection.update_one({"_id": id_token.id_token}, {"$set": standard_data}, upsert=True)
             print("Document inserted successfully!")
         except Exception as e:
             print(f"Error occurred during insertion: {e}")
