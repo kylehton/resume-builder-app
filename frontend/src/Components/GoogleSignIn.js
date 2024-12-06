@@ -52,7 +52,7 @@ import "./GoogleSignIn.css";
         const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieveToken', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token : payload["sub"] })
+          body: JSON.stringify({ id_token : response.credential }),
         });
 
         const data = await resp.json();
