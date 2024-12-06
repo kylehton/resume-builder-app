@@ -14,6 +14,10 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from contextlib import asynccontextmanager
 
+
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
 load_dotenv()
 
 @asynccontextmanager
@@ -78,12 +82,13 @@ app.add_middleware(
 )
 
 class GoogleToken(BaseModel):
-    id_token: int
+    id_token: str
 
-@app.post("/retrieveToken")
-def retrieveToken(id_token: GoogleToken):
+@app.post("/retrieve_token")
+def retrieve_token(id_token: GoogleToken):
     try:
-        return id_token.id_token
+        id_info = id_token.verify_oauth2_token(id_token.id_token, requests.Request(), os.getenv("REACT_APP_GOOGLE_CLIENT_ID"))
+        return id_info['sub']
     except Exception as e:
         raise HTTPException(status_code=500, detail= f"Error with Google Token: {e}")
 
