@@ -77,9 +77,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
-
 # Define the request body for the chat endpoint
 class MessageRequest(BaseModel):
     message: str
