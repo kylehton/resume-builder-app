@@ -83,7 +83,7 @@ class GoogleToken(BaseModel):
 @app.post("/retrieveToken")
 def retrieveToken(id_token: GoogleToken):
     try:
-        return id_token.id_token["sub"]
+        return id_token.id_token
     except Exception as e:
         raise HTTPException(status_code=500, detail= f"Error with Google Token: {e}")
 
