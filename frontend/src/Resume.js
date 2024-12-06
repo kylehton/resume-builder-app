@@ -128,7 +128,7 @@ const Resume = () => {
         </div>
       </div>
       <ChatBox onResumeUpload={handleResumeUpload} onAutoMessage={() => setProgress(calculateProgress(2))} onDownloadClick={handleDownload} />
-      <ResumeBox resumeUrl={resumeUrl} />
+      <ResumeBox resumeUrl={resumeUrl} pdfBlob={pdfBlob} pdfName={pdfName} />
 
       {/* Show the modal if the user has downloaded the resume */}
       {showModal && <ConfirmationModal onClose={handleModalClose} onYes={handleYes} onNo={handleNo} resumeUrl={resumeUrl} pdfName={pdfName} saveResumeToDB={saveResumeToDB} />}
