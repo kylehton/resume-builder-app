@@ -29,22 +29,20 @@ openAIClient = OpenAI(api_key=api_key)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        global mongoClient
         # Create MongoDB connection
         uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
-        mongoClient = MongoClient(uri, server_api=ServerApi('1'))
+        mongo_client = MongoClient(uri, server_api=ServerApi('1'))
         # Test the connection with a ping
-        mongoClient.admin.command('ping')
+        mongo_client.admin.command('ping')
         print("MongoDB connection established and pinged successfully!")
-        app.state.mongoClient = mongoClient  # Store client in app state
-
+        app.state.mongo_client = mongo_client  # Store client in app state
         yield  # Proceed with app lifespan
     except Exception as e:
         print(f"Error occurred during MongoDB connection: {e}")
         raise HTTPException(status_code=500, detail="Error with MongoDB connection")
     finally:
         # Close the MongoDB connection on shutdown
-        mongoClient.close()
+        mongo_client.close()
         print("MongoDB connection closed!")
 
 app = FastAPI(lifespan=lifespan) # creates instance of FastAPI
@@ -90,8 +88,8 @@ class GoogleToken(BaseModel):
 @app.post("/retrieve_token")
 def retrieve_token(id_token: GoogleToken):
     try:
-        mongo_Client = app.state.mongoClient
-        resumeDatabase = mongo_Client["resume_storage"]
+        mongo_client = app.state.mongo_client
+        resumeDatabase = mongo_client["resume_storage"]
         resume_collection = resumeDatabase["all_resumes"]
         try:
             standard_data = {"resume" : "Initial Insert"}
