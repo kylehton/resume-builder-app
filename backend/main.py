@@ -90,9 +90,9 @@ class GoogleToken(BaseModel):
 @app.post("/retrieve_token")
 def retrieve_token(id_token: GoogleToken):
     try:
-        mongoClient = app.state.mongoClient
-        resumeDatabase = mongoClient["PlainTextResumeStorage"]
-        resume_collection = resumeDatabase["resume"]
+        mongo_Client = app.state.mongoClient
+        resumeDatabase = mongo_Client["resume_storage"]
+        resume_collection = resumeDatabase["all_resumes"]
         try:
             standard_data = {"resume" : "Initial Insert"}
             resume_collection.update_one({"_id": id_token.id_token}, {"$set": standard_data}, upsert=True)
