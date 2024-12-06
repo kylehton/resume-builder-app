@@ -77,6 +77,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class GoogleToken(BaseModel):
+    id_token: str
+
+@app.post("/retrieveToken")
+def retrieveToken(id_token: GoogleToken):
+    try:
+        return id_token.id_token["sub"]
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error with Google Token")
+
+
 # Define the request body for the chat endpoint
 class MessageRequest(BaseModel):
     message: str
