@@ -78,7 +78,7 @@ app.add_middleware(
 )
 
 class GoogleToken(BaseModel):
-    id_token: str
+    id_token: int
 
 @app.post("/retrieveToken")
 def retrieveToken(id_token: GoogleToken):
