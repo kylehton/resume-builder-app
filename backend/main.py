@@ -7,8 +7,6 @@ import os
 import redis
 from celery import Celery
 
-from textToPDF.conversion import parse_and_generate_pdf
-
 app = FastAPI() # creates instance of FastAPI
 load_dotenv()
 
