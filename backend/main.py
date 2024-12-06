@@ -86,14 +86,14 @@ class GoogleToken(BaseModel):
 @app.post("/retrieve_token")
 def retrieve_token(id_token: GoogleToken):
     try:
-        #resumeDatabase = mongoClient["PlainTextResumeStorage"]
-        #resume_collection = resumeDatabase["resume"]
-        #try:
-        #    resume_collection.update_one({"_id": id_token.id_token}, {"resume": "Test Run 1"}, upsert=True)
-        #    print("Document inserted successfully!")
-        #except Exception as e:
-        #    print(f"Error occurred during insertion: {e}")
-        #    raise HTTPException(status_code=500, detail=f"Error with MongoDB insertion:{e}")
+        resumeDatabase = mongoClient["PlainTextResumeStorage"]
+        resume_collection = resumeDatabase["resume"]
+        try:
+            resume_collection.update_one({"_id": id_token.id_token}, {"resume": "Test Run 1"}, upsert=True)
+            print("Document inserted successfully!")
+        except Exception as e:
+            print(f"Error occurred during insertion: {e}")
+            raise HTTPException(status_code=500, detail=f"Error with MongoDB insertion:{e}")
         return id_token.id_token        
     except Exception as e:
         raise HTTPException(status_code=500, detail= f"Error with Google Token: {e}")
