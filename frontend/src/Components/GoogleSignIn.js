@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import "./GoogleSignIn.css";
 
   const GoogleSignIn = () => {
-    const clientID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    const clientID = '1017582917817-p6iqv8rkhq3qnndor1k151ukgm60ricl.apps.googleusercontent.com'
+    //process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
     // unable to read from .env file, so manually insert the clientID when using localhost, and 
     // revert back to this when pushing onto main branch for deployment
     const navigate = useNavigate();
@@ -45,8 +47,12 @@ import "./GoogleSignIn.css";
     const handleCredentialResponse = (response) => {
       if (response.credential) {
         console.log("Encoded JWT ID token: " + response.credential);
+
+        const payload = JSON.parse(atob((response.credential).split(".")[1]));
+        console.log("User Info:", payload["sub"]);
+
         // Navigate to the dashboard after successful sign-in
-        window.location.href = '/dashboard';
+        //window.location.href = '/dashboard';
       } else {
         console.error("Error in Google Sign-In: ", response.error);
       }

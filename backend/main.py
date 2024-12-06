@@ -1,16 +1,48 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from dotenv import load_dotenv
+
 from openai import OpenAI
+
 import os
+from dotenv import load_dotenv
+
 import redis
 from celery import Celery
 
-app = FastAPI() # creates instance of FastAPI
+from pymongo import MongoClient
+from pymongo.server_api import ServerApi
+from contextlib import asynccontextmanager
+
 load_dotenv()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global mongoClient
+    try:
+        # Create MongoDB connection
+        uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
+        mongoClient = MongoClient(uri, server_api=ServerApi('1'))
+        # Test the connection with a ping
+        mongoClient.admin.command('ping')
+        print("MongoDB connection established and pinged successfully!")
+        yield  # Proceed with app lifespan
+    except Exception as e:
+        print(f"Error occurred during MongoDB connection: {e}")
+        raise HTTPException(status_code=500, detail="Error with MongoDB connection")
+    finally:
+        # Close the MongoDB connection on shutdown
+        mongoClient.close()
+        print("MongoDB connection closed!")
+
+app = FastAPI(lifespan=lifespan) # creates instance of FastAPI
+
+# Load environment variables
 redisUrl = os.getenv("REDISCLOUD_URL")
+db_password = os.getenv("DB_PASSWORD")
+redis_key = os.getenv('REDIS_KEY')
+api_key = os.getenv('OPENAI_API_KEY') 
+openAIClient = OpenAI(api_key=api_key)
 
 # creates instance of Celery 
 celery = Celery(
@@ -28,10 +60,6 @@ celery.conf.update(
     enable_utc=True,
 )
 
-# Load environment variables
-redis_key = os.getenv('REDIS_KEY')
-api_key = os.getenv('OPENAI_API_KEY') # into vercel here
-client = OpenAI(api_key=api_key)
 
 # Connect to Redis via Heroku-Redis add-on
 r = redis.from_url(redisUrl)
@@ -49,6 +77,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
+
 # Define the request body for the chat endpoint
 class MessageRequest(BaseModel):
     message: str
@@ -57,7 +88,7 @@ class MessageRequest(BaseModel):
 @celery.task(name="main.process_message")
 def process_message(request_message: str):
     try:
-        response = client.chat.completions.create(
+        response = openAIClient.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are going to help with resume suggestions"},
