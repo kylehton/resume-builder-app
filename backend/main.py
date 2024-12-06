@@ -17,6 +17,13 @@ from contextlib import asynccontextmanager
 
 load_dotenv()
 
+# Load environment variables
+redisUrl = os.getenv("REDISCLOUD_URL")
+db_password = os.getenv("DB_PASSWORD")
+redis_key = os.getenv('REDIS_KEY')
+api_key = os.getenv('OPENAI_API_KEY') 
+openAIClient = OpenAI(api_key=api_key)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global mongoClient
@@ -38,12 +45,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan) # creates instance of FastAPI
 
-# Load environment variables
-redisUrl = os.getenv("REDISCLOUD_URL")
-db_password = os.getenv("DB_PASSWORD")
-redis_key = os.getenv('REDIS_KEY')
-api_key = os.getenv('OPENAI_API_KEY') 
-openAIClient = OpenAI(api_key=api_key)
+
 
 # creates instance of Celery 
 celery = Celery(
