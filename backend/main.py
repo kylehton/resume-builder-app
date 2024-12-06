@@ -7,6 +7,8 @@ import os
 import redis
 from celery import Celery
 
+from textToPDF.conversion import parse_and_generate_pdf
+
 app = FastAPI() # creates instance of FastAPI
 load_dotenv()
 
@@ -78,6 +80,35 @@ def chat(message: MessageRequest):
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error with OpenAI API")
+    
+@app.post("/resume")
+def resume():
+    try:
+        grabbedResume = get_new_resume_text.delay()
+        task = generate_pdf.delay(grabbedResume)
+        return {"task_id": task.id}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error with conversion")
+    
+# Grab the touched up response from agent
+@celery.task(name="main.get_new_resume_text")
+def get_new_resume_text():
+    try:
+        return
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Could not retrieve new resume text")
+
+# Create endpoint to generate PDF from the chat API response
+@celery.task(name="main.generate_pdf")
+def generate_pdf():
+    try:
+        task = parse_and_generate_pdf.delay()
+        return {"task_id": task.id}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error with conversion")
 
 # Create endpoint to get the result of the chat API for state logging
 @app.get("/result/{task_id}")
