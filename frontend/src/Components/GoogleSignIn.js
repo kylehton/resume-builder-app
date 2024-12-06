@@ -55,7 +55,7 @@ import "./GoogleSignIn.css";
           body: JSON.stringify({ id_token : response.credential }),
         });
 
-        const data = await resp.json();
+        const data = await resp;
         console.log("returned data:", data);
         
 
