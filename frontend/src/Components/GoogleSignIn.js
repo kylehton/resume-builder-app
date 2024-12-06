@@ -43,12 +43,24 @@ import "./GoogleSignIn.css";
       };
     }, [clientID]);
   
-    const handleCredentialResponse = (response) => {
+    const handleCredentialResponse = async (response) => {
       if (response.credential) {
-        console.log("Encoded JWT ID token: " + response.credential);
-
+        //response.credential is the JWT token for the authenticated user
         const payload = JSON.parse(atob((response.credential).split(".")[1]));
-        console.log("User Info:", payload["sub"]);
+        console.log("User ID:", payload["sub"]);// accesses the user ID from token
+
+        const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieveToken', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token : response.credential})
+        });
+
+        const data = await resp.json();
+        console.log("returned data:", data);
+        const taskId = data.task_id;
+        console.log("task id:", taskId);
+
+        // post request to backend to store user ID for usage in the backend
 
         // Navigate to the dashboard after successful sign-in
         //window.location.href = '/dashboard';
