@@ -57,8 +57,7 @@ import "./GoogleSignIn.css";
 
         const data = await resp.json();
         console.log("returned data:", data);
-        const taskId = data.task_id;
-        console.log("task id:", taskId);
+        
 
         // post request to backend to store user ID for usage in the backend
 

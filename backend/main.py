@@ -85,8 +85,7 @@ def retrieveToken(id_token: GoogleToken):
     try:
         return id_token.id_token["sub"]
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Error with Google Token")
+        raise HTTPException(status_code=500, detail= f"Error with Google Token: {e}")
 
 
 # Define the request body for the chat endpoint
