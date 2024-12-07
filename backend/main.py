@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from openai import OpenAI
 import redis
 from celery import Celery
+import time
 
 load_dotenv()
 
@@ -22,39 +23,37 @@ redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY') 
 openAIClient = OpenAI(api_key=api_key)
 
-app = FastAPI()
 mongo_client = None  # Global variable for MongoDB client
 mongo_uri = os.getenv("MONGO_URI")
 
-# MongoDB connection initialization on startup
-@app.on_event("startup")
-async def startup_mongo():
-    try:
-        print("Starting MongoDB connection...")  # Debug log
-        # Construct the MongoDB URI with the password
-        #uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
+# Global variable to cache the client connection
+_mongo_client = None
+
+def get_mongo_client():
+    global _mongo_client
+    
+    # If client doesn't exist or is closed, create a new one
+    if _mongo_client is None:
+        try:
+            uri = os.getenv("MONGO_URI")
+            if not uri:
+                raise ValueError("MongoDB URI not found in environment variables")
+            
+            print("Initializing MongoDB connection...")
+            _mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+            
+            # Verify connection
+            _mongo_client.admin.command('ping')
+            print("MongoDB connection established successfully!")
         
-        # Connect to MongoDB
-        mongo_client = MongoClient(mongo_uri, server_api=ServerApi('1'))
+        except Exception as e:
+            print(f"MongoDB connection failed: {e}")
+            raise HTTPException(status_code=500, detail=f"MongoDB connection failed: {str(e)}")
+    
+    return _mongo_client
 
-        # Test the connection with a ping
-        mongo_client.admin.command('ping')
-        print("MongoDB connection established and pinged successfully!")
-
-        # Store the MongoClient in app state for access in other routes
-        app.state.mongo_client = mongo_client
-    except Exception as e:
-        print(f"Error during MongoDB initialization: {e}")
-        raise HTTPException(status_code=500, detail=f"MongoDB initialization failed: {e}")
-
-# MongoDB connection cleanup on shutdown
-@app.on_event("shutdown")
-async def shutdown_mongo():
-    if hasattr(app.state, "mongo_client"):
-        app.state.mongo_client.close()
-        print("MongoDB connection closed during shutdown.")
-    else:
-        print("MongoDB client not found during shutdown.")
+# In your main FastAPI file
+app = FastAPI()
 
 # creates instance of Celery 
 celery = Celery(
@@ -105,12 +104,12 @@ async def retrieve_token(data: GoogleToken):
         name = idinfo.get("name")
 
         # Access MongoDB
-        mongo_client = app.state.mongo_client
+        mongo_client = get_mongo_client()
         resume_db = mongo_client["PlainTextResumeStorage"]
         resume_collection = resume_db["resume"]
 
         # Store or update user in MongoDB
-        user_data = {"_id": user_id, "email": email, "name": name, "update": "1" ,"credentials": data.id_token}
+        user_data = {"_id": user_id, "email": email, "name": name, "update": "3" ,"credentials": data.id_token}
         resume_collection.update_one({"_id": user_id}, {"$set": user_data}, upsert=True)
         print(f"User verified: {name} ({email}), ID: {user_id}")
         return {"message": "User verified and stored successfully", "user_id": user_id}
@@ -174,6 +173,9 @@ async def root():
 # Health check endpoint for mongo_client global connection
 @app.get("/health")
 async def health_check():
-    if not hasattr(app.state, "mongo_client"):
-        return {"status": "error", "message": "MongoDB client not initialized"}
-    return {"status": "ok", "message": "MongoDB client is initialized"}
+    try:
+        client = get_mongo_client()
+        client.admin.command('ping')
+        return {"status": "ok", "message": "MongoDB client is initialized and responsive"}
+    except Exception as e:
+        return {"status": "error", "message": f"MongoDB connection failed: {str(e)}"}
