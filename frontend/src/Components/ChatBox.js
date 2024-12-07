@@ -71,6 +71,12 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                 console.log("BEGINNING TO IMPROVE RESUME")
 
                 const token = localStorage.getItem('id_token')
+
+                if (!token) {
+                  console.error("Token not found.");
+                  return;
+                }
+
                 fetch('https://resume-builder-backend-mu.vercel.app/improve_resume', {
                   method: 'POST',
                   headers: {
