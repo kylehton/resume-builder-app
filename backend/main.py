@@ -25,26 +25,28 @@ openAIClient = OpenAI(api_key=api_key)
 # FastAPI lifespan to manage MongoDB connection
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("Lifespan context has started.")  # Debug log
     try:
         # Attempt to connect to MongoDB
         uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
         mongo_client = MongoClient(uri, server_api=ServerApi('1'))
-        
+
         # Test the connection with a ping
         mongo_client.admin.command('ping')
         print("MongoDB connection established and pinged successfully!")
-        
-        # Set the client in app state
+
+        # Store the MongoClient in the app's state
         app.state.mongo_client = mongo_client
         yield
     except Exception as e:
         print(f"Error during MongoDB initialization: {e}")
         raise HTTPException(status_code=500, detail=f"MongoDB initialization failed: {e}")
     finally:
-        # Close the MongoDB connection on shutdown
         if hasattr(app.state, "mongo_client"):
             app.state.mongo_client.close()
             print("MongoDB connection closed!")
+        print("Lifespan context has ended.")
+
 
 
 # Create FastAPI app
