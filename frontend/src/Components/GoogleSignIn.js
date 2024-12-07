@@ -46,7 +46,7 @@ import "./GoogleSignIn.css";
     const handleCredentialResponse = async (response) => {
       if (response.credential) {
         //response.credential is the JWT token for the authenticated user
-        //const payload = JSON.parse(atob((response.credential).split(".")[1]));
+        const payload = JSON.parse(atob((response.credential).split(".")[1]));
         console.log("User ID:", payload["sub"]);// accesses the user ID from token
 
         const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieve_token', {
