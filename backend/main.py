@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from contextlib import asynccontextmanager
+from openai import OpenAI
+import redis
+from celery import Celery
 
 load_dotenv()
 
@@ -15,30 +18,57 @@ load_dotenv()
 redisUrl = os.getenv("REDISCLOUD_URL")
 db_password = os.getenv("DB_PASSWORD")
 GOOGLE_CLIENT_ID = os.getenv("REACT_APP_GOOGLE_CLIENT_ID").strip()  # Google Client ID from .env
+redis_key = os.getenv('REDIS_KEY')
+api_key = os.getenv('OPENAI_API_KEY') 
+openAIClient = OpenAI(api_key=api_key)
 
 # FastAPI lifespan to manage MongoDB connection
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        # Create MongoDB connection
+        # Attempt to connect to MongoDB
         uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
         mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+        
         # Test the connection with a ping
         mongo_client.admin.command('ping')
         print("MongoDB connection established and pinged successfully!")
-        app.state.mongo_client = mongo_client  # Store client in app state
+        
+        # Set the client in app state
+        app.state.mongo_client = mongo_client
         yield
     except Exception as e:
-        print(f"Error occurred during MongoDB connection: {e}")
-        raise HTTPException(status_code=500, detail="Error with MongoDB connection")
+        print(f"Error during MongoDB initialization: {e}")
+        raise HTTPException(status_code=500, detail=f"MongoDB initialization failed: {e}")
     finally:
         # Close the MongoDB connection on shutdown
         if hasattr(app.state, "mongo_client"):
             app.state.mongo_client.close()
             print("MongoDB connection closed!")
 
+
 # Create FastAPI app
 app = FastAPI(lifespan=lifespan)
+
+# creates instance of Celery 
+celery = Celery(
+    "tasks",
+    broker=redisUrl,
+    backend=redisUrl
+)
+
+# Celery configuration
+celery.conf.update(
+    task_serializer="json",
+    result_serializer="json",
+    accept_content=["json"],
+    timezone="UTC",
+    enable_utc=True,
+)
+
+
+# Connect to Redis via Heroku-Redis add-on
+r = redis.from_url(redisUrl)
 
 # Middleware to allow CORS
 app.add_middleware(
@@ -87,6 +117,58 @@ async def retrieve_token(data: GoogleToken):
         print(f"Error during token processing: {e}")
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
+# Define the request body for the chat endpoint
+class MessageRequest(BaseModel):
+    message: str
+
+# Create endpoint for API call to OpenAI and run it as a Celery task
+@celery.task(name="main.process_message")
+def process_message(request_message: str):
+    try:
+        response = openAIClient.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are going to help with resume suggestions"},
+                {"role": "user", "content": request_message}
+            ]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error occurred during processing of message: {e}")
+        return {"error": str(e)}
+
+# Create endpoint for chat API
+@app.post("/chat")
+def chat(message: MessageRequest):
+    try:
+        task = process_message.delay(message.message) # Use .delay() to run the task asynchronously
+        return {"task_id": task.id}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error with OpenAI API")
+    
+
+# Create endpoint to get the result of the chat API for state logging
+@app.get("/result/{task_id}")
+def get_result(task_id: str):
+    result = celery.AsyncResult(task_id)  # Get the result of the task
+    print(f"Task ID: {task_id}, Status: {result.state}")
+    if result.state == 'PENDING':
+        return {"status": result.state}
+    elif result.state == 'FAILURE':
+        print(f"Task Failed: {result.info}")
+        return {"status": result.state, "error": str(result.info)}
+    else:
+        print(f"Task Completed: {result.result}")
+        return {"status": result.state, "result": result.result}
+
 @app.get("/")
 async def root():
     return {"message": "testing access"}
+
+# Health check endpoint for mongo_client global connection
+@app.get("/health")
+async def health_check():
+    if not hasattr(app.state, "mongo_client"):
+        return {"status": "error", "message": "MongoDB client not initialized"}
+    return {"status": "ok", "message": "MongoDB client is initialized"}
