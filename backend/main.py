@@ -83,21 +83,11 @@ app.add_middleware(
 )
 
 class GoogleToken(BaseModel):
-    id_token: str
+    id_token: int
 
 @app.post("/retrieve_token")
 def retrieve_token(id_token: GoogleToken):
     try:
-        mongo_client = app.state.mongo_client
-        resumeDatabase = mongo_client["resume_storage"]
-        resume_collection = resumeDatabase["all_resumes"]
-        try:
-            standard_data = {"resume" : "Initial Insert"}
-            resume_collection.update_one({"_id": id_token.id_token}, {"$set": standard_data}, upsert=True)
-            print("Document inserted successfully!")
-        except Exception as e:
-            print(f"Error occurred during insertion: {e}")
-            raise HTTPException(status_code=500, detail=f"Error with MongoDB insertion:{e}")
         return id_token.id_token        
     except Exception as e:
         raise HTTPException(status_code=500, detail= f"Error with Google Token: {e}")
