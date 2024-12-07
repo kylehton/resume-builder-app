@@ -50,6 +50,11 @@ import "./GoogleSignIn.css";
         console.log("Token credentials:", response.credential);
         console.log("User ID:", payload["sub"]);// accesses the user ID from token
 
+        // DO NOT REMOVE THIS LINE
+        // STORES LOCALLY FOR USAGE IN THE BACKEND
+        localStorage.setItem('user_credential', response.credential); // Store the token in local storage
+
+        // post request to backend to store user ID and create MongoDB Document
         const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieve_token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,10 +71,8 @@ import "./GoogleSignIn.css";
         console.error("No credential received from Google Sign-In");
       }
 
-        // post request to backend to store user ID for usage in the backend
         // Navigate to the dashboard after successful sign-in
-
-        //window.location.href = '/dashboard';
+        window.location.href = '/dashboard';
       
     };
   
