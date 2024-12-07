@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google.oauth2 import id_token
@@ -7,11 +8,9 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
-from contextlib import asynccontextmanager
 from openai import OpenAI
 import redis
 from celery import Celery
-import time
 
 load_dotenv()
 
@@ -85,6 +84,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Security scheme to handle bearer tokens
+security = HTTPBearer()
+
+# Dependency for user authentication
+async def get_current_user(
+    request: Request, 
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    try:
+        # Verify the Google ID Token
+        idinfo = id_token.verify_oauth2_token(
+            credentials.credentials, 
+            requests.Request(), 
+            os.getenv("REACT_APP_GOOGLE_CLIENT_ID")
+        )
+        
+        # Extract key user information
+        user_id = idinfo["sub"]
+        
+        return user_id
+    
+    except ValueError:
+        raise HTTPException(
+            status_code=401, 
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
+
+
+
+
+
+
+
+
+
 # Request body model for retrieving token
 class GoogleToken(BaseModel):
     id_token: str
@@ -106,7 +144,7 @@ async def retrieve_token(data: GoogleToken):
         resume_collection = resume_db["resume"]
 
         # Store or update user in MongoDB
-        user_data = {"_id": user_id, "email": email, "name": name, "update": "3" ,"credentials": data.id_token}
+        user_data = {"_id": user_id, "email": email, "name": name, "update": "4" ,"credentials": data.id_token}
         resume_collection.update_one({"_id": user_id}, {"$set": user_data}, upsert=True)
         print(f"User verified: {name} ({email}), ID: {user_id}")
         return {"message": "User verified and stored successfully", "user_id": user_id}
@@ -117,6 +155,14 @@ async def retrieve_token(data: GoogleToken):
     except Exception as e:
         print(f"Error during token processing: {e}")
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
+
+
+
+
+
+
+
 
 # Define the request body for the chat endpoint
 class MessageRequest(BaseModel):
@@ -137,6 +183,113 @@ def process_message(request_message: str):
     except Exception as e:
         print(f"Error occurred during processing of message: {e}")
         return {"error": str(e)}
+
+
+
+
+
+
+
+
+
+
+class ResumeImprovementRequest(BaseModel):
+    improvement_instruction: str
+
+# Modify the Celery task to handle resume improvement
+@celery.task(name="main.improve_resume")
+def improve_resume(user_id: str, improvement_instruction: str):
+    try:
+        # Get MongoDB client
+        mongo_client = get_mongo_client()
+        resume_db = mongo_client["PlainTextResumeStorage"]
+        resume_collection = resume_db["resume"]
+
+        # Retrieve the user's resume
+        resume_doc = resume_collection.find_one({"_id": user_id})
+        
+        if not resume_doc:
+            return {"error": "Resume not found"}
+
+        # Prepare the prompt for OpenAI with current resume and improvement instruction
+        current_resume = resume_doc.get('content', '')
+        
+        # Construct the prompt
+        prompt = f"""
+        Current Resume:
+        {current_resume}
+
+        Improvement Instruction: {improvement_instruction}
+
+        Please provide an improved version of the resume based on the instruction above.
+        """
+
+        # Call OpenAI to improve the resume
+        response = openAIClient.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a professional resume editor. Provide detailed, precise improvements to the resume."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        # Get the improved resume content
+        improved_resume = response.choices[0].message.content
+
+        # Update the resume in the database
+        resume_collection.update_one(
+            {"_id": user_id},
+            {"$set": {
+                "content": improved_resume,
+                "last_improved": improvement_instruction
+            }}
+        )
+
+        return {
+            "improved_resume": improved_resume,
+            "improvement_instruction": improvement_instruction
+        }
+    
+    except Exception as e:
+        print(f"Error occurred during resume improvement: {e}")
+        return {"error": str(e)}
+
+
+
+
+
+
+
+
+# Create endpoint for resume improvement
+@app.post("/improve_resume")
+def improve_resume_endpoint(
+    request: ResumeImprovementRequest,
+    user_id: str = Depends(get_current_user)
+):
+    try:
+        # Trigger the Celery task for resume improvement
+        task = improve_resume.delay(user_id, request.improvement_instruction)
+        
+        return {
+            "task_id": task.id,
+            "message": "Resume improvement task initiated"
+        }
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error initiating resume improvement")
+
+
+
+
+
+
+
+
+
+
+
 
 # Create endpoint for chat API
 @app.post("/chat")
