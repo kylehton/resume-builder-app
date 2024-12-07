@@ -14,7 +14,7 @@ load_dotenv()
 # Load environment variables
 redisUrl = os.getenv("REDISCLOUD_URL")
 db_password = os.getenv("DB_PASSWORD")
-GOOGLE_CLIENT_ID = os.getenv("REACT_APP_GOOGLE_CLIENT_ID")  # Google Client ID from .env
+GOOGLE_CLIENT_ID = os.getenv("REACT_APP_GOOGLE_CLIENT_ID").strip()  # Google Client ID from .env
 
 # FastAPI lifespan to manage MongoDB connection
 @asynccontextmanager
