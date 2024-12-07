@@ -70,17 +70,18 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                 console.log("BEGINNING TO IMPROVE RESUME")
                 console.log("BEGINNING TO IMPROVE RESUME")
 
-                const token = localStorage.getItem('id_token')
+                const cred = localStorage.getItem('user_credential');
+                print("User Credential:", cred)
 
-                if (!token) {
-                  console.error("Token not found.");
+                if (!cred) {
+                  console.error("Credentials not found.");
                   return;
                 }
 
                 fetch('https://resume-builder-backend-mu.vercel.app/improve_resume', {
                   method: 'POST',
                   headers: {
-                    'Authorization': `Bearer ${token}`, // Add the token in the Authorization header
+                    'Authorization': `Bearer ${cred}`, // Add the token in the Authorization header
                     'Content-Type': 'application/json'  // Ensure the content type is set to JSON
                   },
                   body: JSON.stringify({'improvement_instruction': result})  // Send the request body as JSON
