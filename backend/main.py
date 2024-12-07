@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from openai import OpenAI
 import redis
 from celery import Celery
+import time
 
 load_dotenv()
 
@@ -25,27 +26,33 @@ openAIClient = OpenAI(api_key=api_key)
 app = FastAPI()
 mongo_client = None  # Global variable for MongoDB client
 
-# MongoDB connection initialization on startup
+# Startup event to initialize MongoDB
 @app.on_event("startup")
 async def startup_mongo():
     global mongo_client
-    if mongo_client is None:
+    retries = 5
+    for attempt in range(retries):
         try:
-            print("Starting MongoDB connection...")
-            uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
-            mongo_client = MongoClient(uri, server_api=ServerApi('1'))
-            mongo_client.admin.command('ping')
-            print("MongoDB connection established and pinged successfully!")
+            if mongo_client is None:  # Only initialize once
+                print("Starting MongoDB connection...")
+                uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
+                mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+                mongo_client.admin.command('ping')
+                print("MongoDB connection established successfully!")
+                break
         except Exception as e:
-            print(f"MongoDB initialization failed: {e}")
-            raise HTTPException(status_code=500, detail="MongoDB initialization failed")
+            if attempt == retries - 1:
+                print(f"MongoDB connection failed: {e}")
+                raise HTTPException(status_code=500, detail="MongoDB connection failed after retries")
+            print(f"Attempt {attempt + 1} to connect to MongoDB failed, retrying...")
+            time.sleep(2)
 
 @app.on_event("shutdown")
 async def shutdown_mongo():
     global mongo_client
     if mongo_client:
         mongo_client.close()
-        print("MongoDB connection closed during shutdown.")
+        print("MongoDB connection closed.")
 
 # creates instance of Celery 
 celery = Celery(
