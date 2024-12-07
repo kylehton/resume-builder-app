@@ -22,35 +22,37 @@ redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY') 
 openAIClient = OpenAI(api_key=api_key)
 
-# FastAPI lifespan to manage MongoDB connection
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Lifespan context has started.")  # Debug log
+app = FastAPI()
+
+# MongoDB connection initialization on startup
+@app.on_event("startup")
+async def startup_mongo():
     try:
-        # Attempt to connect to MongoDB
+        print("Starting MongoDB connection...")  # Debug log
+        # Construct the MongoDB URI with the password
         uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
+        
+        # Connect to MongoDB
         mongo_client = MongoClient(uri, server_api=ServerApi('1'))
 
         # Test the connection with a ping
         mongo_client.admin.command('ping')
         print("MongoDB connection established and pinged successfully!")
 
-        # Store the MongoClient in the app's state
+        # Store the MongoClient in app state for access in other routes
         app.state.mongo_client = mongo_client
-        yield
     except Exception as e:
         print(f"Error during MongoDB initialization: {e}")
         raise HTTPException(status_code=500, detail=f"MongoDB initialization failed: {e}")
-    finally:
-        if hasattr(app.state, "mongo_client"):
-            app.state.mongo_client.close()
-            print("MongoDB connection closed!")
-        print("Lifespan context has ended.")
 
-
-
-# Create FastAPI app
-app = FastAPI(lifespan=lifespan)
+# MongoDB connection cleanup on shutdown
+@app.on_event("shutdown")
+async def shutdown_mongo():
+    if hasattr(app.state, "mongo_client"):
+        app.state.mongo_client.close()
+        print("MongoDB connection closed during shutdown.")
+    else:
+        print("MongoDB client not found during shutdown.")
 
 # creates instance of Celery 
 celery = Celery(
