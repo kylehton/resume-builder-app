@@ -90,25 +90,33 @@ security = HTTPBearer()
 
 # Dependency for user authentication
 async def get_current_user(
-    request: Request, 
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     try:
+        # Log the received credentials
+        print(f"Authorization Header Received: {credentials.credentials}")
+
         # Verify the Google ID Token
         idinfo = id_token.verify_oauth2_token(
-            credentials.credentials, 
-            requests.Request(), 
+            credentials.credentials,
+            requests.Request(),
             os.getenv("REACT_APP_GOOGLE_CLIENT_ID")
         )
-        
-        # Extract key user information
+
+        # Log the decoded token information
+        print(f"Decoded Token Info: {idinfo}")
+
+        # Extract and return the user ID
         user_id = idinfo["sub"]
-        
+        print(f"Authenticated User ID: {user_id}")
         return user_id
-    
-    except ValueError:
+
+    except ValueError as e:
+        # Log error details if token verification fails
+        print(f"Token verification error: {e}")
         raise HTTPException(
-            status_code=401, 
+            status_code=401,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
@@ -179,6 +187,7 @@ def process_message(request_message: str):
                 {"role": "user", "content": request_message}
             ]
         )
+        print(response.choices[0].message.content)
         return response.choices[0].message.content
     except Exception as e:
         print(f"Error occurred during processing of message: {e}")
@@ -229,11 +238,12 @@ def improve_resume(user_id: str, improvement_instruction: str):
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a professional resume editor. Provide detailed, precise improvements to the resume."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt }
             ]
         )
 
         # Get the improved resume content
+        print(response.choices[0].message.content)
         improved_resume = response.choices[0].message.content
 
         # Update the resume in the database
