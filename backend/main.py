@@ -11,7 +11,6 @@ from contextlib import asynccontextmanager
 from openai import OpenAI
 import redis
 from celery import Celery
-import time
 
 load_dotenv()
 
@@ -25,34 +24,37 @@ openAIClient = OpenAI(api_key=api_key)
 
 app = FastAPI()
 mongo_client = None  # Global variable for MongoDB client
+mongo_uri = os.getenv("MONGO_URI")
 
-# Startup event to initialize MongoDB
+# MongoDB connection initialization on startup
 @app.on_event("startup")
 async def startup_mongo():
-    global mongo_client
-    retries = 5
-    for attempt in range(retries):
-        try:
-            if mongo_client is None:  # Only initialize once
-                print("Starting MongoDB connection...")
-                uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
-                mongo_client = MongoClient(uri, server_api=ServerApi('1'))
-                mongo_client.admin.command('ping')
-                print("MongoDB connection established successfully!")
-                break
-        except Exception as e:
-            if attempt == retries - 1:
-                print(f"MongoDB connection failed: {e}")
-                raise HTTPException(status_code=500, detail="MongoDB connection failed after retries")
-            print(f"Attempt {attempt + 1} to connect to MongoDB failed, retrying...")
-            time.sleep(2)
+    try:
+        print("Starting MongoDB connection...")  # Debug log
+        # Construct the MongoDB URI with the password
+        #uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
+        
+        # Connect to MongoDB
+        mongo_client = MongoClient(mongo_uri, server_api=ServerApi('1'))
 
+        # Test the connection with a ping
+        mongo_client.admin.command('ping')
+        print("MongoDB connection established and pinged successfully!")
+
+        # Store the MongoClient in app state for access in other routes
+        app.state.mongo_client = mongo_client
+    except Exception as e:
+        print(f"Error during MongoDB initialization: {e}")
+        raise HTTPException(status_code=500, detail=f"MongoDB initialization failed: {e}")
+
+# MongoDB connection cleanup on shutdown
 @app.on_event("shutdown")
 async def shutdown_mongo():
-    global mongo_client
-    if mongo_client:
-        mongo_client.close()
-        print("MongoDB connection closed.")
+    if hasattr(app.state, "mongo_client"):
+        app.state.mongo_client.close()
+        print("MongoDB connection closed during shutdown.")
+    else:
+        print("MongoDB client not found during shutdown.")
 
 # creates instance of Celery 
 celery = Celery(
@@ -108,9 +110,8 @@ async def retrieve_token(data: GoogleToken):
         resume_collection = resume_db["resume"]
 
         # Store or update user in MongoDB
-        user_data = {"_id": user_id, "email": email, "name": name}
+        user_data = {"_id": user_id, "email": email, "name": name, "update": "1" ,"credentials": data.id_token}
         resume_collection.update_one({"_id": user_id}, {"$set": user_data}, upsert=True)
-
         print(f"User verified: {name} ({email}), ID: {user_id}")
         return {"message": "User verified and stored successfully", "user_id": user_id}
     except ValueError as e:
@@ -173,7 +174,6 @@ async def root():
 # Health check endpoint for mongo_client global connection
 @app.get("/health")
 async def health_check():
-    if mongo_client is None:
+    if not hasattr(app.state, "mongo_client"):
         return {"status": "error", "message": "MongoDB client not initialized"}
     return {"status": "ok", "message": "MongoDB client is initialized"}
-
