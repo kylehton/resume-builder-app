@@ -35,7 +35,7 @@ const Homepage = () => {
         {/* Image Container */}
         <div className="image-container">
           {/* Replace this src with your resume image URL */}
-          <img src="https://ideogram.ai/assets/image/lossless/response/ipQaSxKATbSQtvLs6MwGtA" alt="Resume Preview" className="resume-image" />
+          <img src="https://i.imgur.com/VUw3ynp.jpeg" alt="Resume Preview" className="resume-image" />
         </div>
       </div>
 
