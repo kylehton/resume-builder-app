@@ -23,9 +23,6 @@ redis_key = os.getenv('REDIS_KEY')
 api_key = os.getenv('OPENAI_API_KEY') 
 openAIClient = OpenAI(api_key=api_key)
 
-mongo_client = None  # Global variable for MongoDB client
-mongo_uri = os.getenv("MONGO_URI")
-
 # Global variable to cache the client connection
 _mongo_client = None
 
