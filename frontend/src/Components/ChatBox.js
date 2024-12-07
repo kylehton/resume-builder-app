@@ -71,7 +71,7 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                 console.log("BEGINNING TO IMPROVE RESUME")
 
                 const cred = localStorage.getItem('user_credential');
-                print("User Credential:", cred)
+                console.log("User Credential:", cred)
 
                 if (!cred) {
                   console.error("Credentials not found.");
