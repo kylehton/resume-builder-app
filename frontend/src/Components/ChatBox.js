@@ -63,6 +63,36 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                         { role: "assistant", content: "Received an unexpected response." }
                     ]);
                 }
+
+                // insert improve_resume here, using variable=result as parameter
+                // also use localStorage.getItem('id_token') to grab token for auth
+                console.log("BEGINNING TO IMPROVE RESUME")
+                console.log("BEGINNING TO IMPROVE RESUME")
+                console.log("BEGINNING TO IMPROVE RESUME")
+
+                const token = localStorage.getItem('id_token')
+                fetch('https://resume-builder-backend-mu.vercel.app/improve_resume', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${token}`, // Add the token in the Authorization header
+                    'Content-Type': 'application/json'  // Ensure the content type is set to JSON
+                  },
+                  body: JSON.stringify({'improvement_instruction': result})  // Send the request body as JSON
+                })
+                .then(response => response.json())
+                .then(data => {
+                  // Handle the response from the API
+                  console.log("API Response:", data);
+                  if (data.task_id) {
+                    console.log(`Task initiated with ID: ${data.task_id}`);
+                  }
+                })
+                .catch(error => {
+                  // Handle any errors that occurred during the request
+                  console.error("Error with resume improvement request:", error);
+                });
+              
+
             } else if (resultData.status === "FAILURE") { // Check for 'FAILURE'
                 console.error("Task failed:", resultData.error);
                 setMessages(messages => [

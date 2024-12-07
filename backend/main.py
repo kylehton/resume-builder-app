@@ -89,6 +89,7 @@ app.add_middleware(
 security = HTTPBearer()
 
 # Dependency for user authentication
+@app.get("/current_user")
 async def get_current_user(
     request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security)
