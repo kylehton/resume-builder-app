@@ -46,26 +46,30 @@ import "./GoogleSignIn.css";
     const handleCredentialResponse = async (response) => {
       if (response.credential) {
         //response.credential is the JWT token for the authenticated user
-        const payload = JSON.parse(atob((response.credential).split(".")[1]));
+        //const payload = JSON.parse(atob((response.credential).split(".")[1]));
         console.log("User ID:", payload["sub"]);// accesses the user ID from token
 
         const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieve_token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token : payload['sub'] }),
+          body: JSON.stringify({ id_token: response.credential }), // Send the full token
         });
-
-        const data = await resp.json();
-        console.log("returned data:", data);
-        
+    
+        if (resp.ok) {
+          const data = await resp.json();
+          console.log("Backend returned data:", data);
+        } else {
+          console.error("Error from backend:", await resp.text());
+        }
+      } else {
+        console.error("No credential received from Google Sign-In");
+      }
 
         // post request to backend to store user ID for usage in the backend
-
         // Navigate to the dashboard after successful sign-in
+
         //window.location.href = '/dashboard';
-      } else {
-        console.error("Error in Google Sign-In: ", response.error);
-      }
+      
     };
   
     return (
