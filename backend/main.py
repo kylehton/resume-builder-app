@@ -23,36 +23,29 @@ api_key = os.getenv('OPENAI_API_KEY')
 openAIClient = OpenAI(api_key=api_key)
 
 app = FastAPI()
+mongo_client = None  # Global variable for MongoDB client
 
 # MongoDB connection initialization on startup
 @app.on_event("startup")
 async def startup_mongo():
-    try:
-        print("Starting MongoDB connection...")  # Debug log
-        # Construct the MongoDB URI with the password
-        uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
-        
-        # Connect to MongoDB
-        mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+    global mongo_client
+    if mongo_client is None:
+        try:
+            print("Starting MongoDB connection...")
+            uri = f"mongodb+srv://kyleton06:{db_password}@plaintextresumestorage.7wxgt.mongodb.net/?retryWrites=true&w=majority&appName=PlainTextResumeStorage"
+            mongo_client = MongoClient(uri, server_api=ServerApi('1'))
+            mongo_client.admin.command('ping')
+            print("MongoDB connection established and pinged successfully!")
+        except Exception as e:
+            print(f"MongoDB initialization failed: {e}")
+            raise HTTPException(status_code=500, detail="MongoDB initialization failed")
 
-        # Test the connection with a ping
-        mongo_client.admin.command('ping')
-        print("MongoDB connection established and pinged successfully!")
-
-        # Store the MongoClient in app state for access in other routes
-        app.state.mongo_client = mongo_client
-    except Exception as e:
-        print(f"Error during MongoDB initialization: {e}")
-        raise HTTPException(status_code=500, detail=f"MongoDB initialization failed: {e}")
-
-# MongoDB connection cleanup on shutdown
 @app.on_event("shutdown")
 async def shutdown_mongo():
-    if hasattr(app.state, "mongo_client"):
-        app.state.mongo_client.close()
+    global mongo_client
+    if mongo_client:
+        mongo_client.close()
         print("MongoDB connection closed during shutdown.")
-    else:
-        print("MongoDB client not found during shutdown.")
 
 # creates instance of Celery 
 celery = Celery(
@@ -173,6 +166,7 @@ async def root():
 # Health check endpoint for mongo_client global connection
 @app.get("/health")
 async def health_check():
-    if not hasattr(app.state, "mongo_client"):
+    if mongo_client is None:
         return {"status": "error", "message": "MongoDB client not initialized"}
     return {"status": "ok", "message": "MongoDB client is initialized"}
+
