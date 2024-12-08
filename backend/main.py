@@ -102,7 +102,7 @@ async def get_current_user(
         idinfo = id_token.verify_oauth2_token(
             credentials.credentials,
             requests.Request(),
-            os.getenv("REACT_APP_GOOGLE_CLIENT_ID")
+            GOOGLE_CLIENT_ID
         )
 
         # Log the decoded token information
