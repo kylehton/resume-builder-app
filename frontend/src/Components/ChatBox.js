@@ -86,7 +86,7 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                     'Authorization': `Bearer ${cred}`, // Add the token in the Authorization header
                     'Content-Type': 'application/json'  // Ensure the content type is set to JSON
                   },
-                  body: JSON.stringify({improvement_instruction: result})  // Send the request body as JSON
+                  body: JSON.stringify({improvement_instruction: "If possible, improve my resume based on this:", result})  // Send the request body as JSON
                 })
                 .then(response => response.json())
                 .then(data => {
