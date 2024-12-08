@@ -67,7 +67,6 @@ celery.conf.update(
     enable_utc=True,
 )
 
-
 # Connect to Redis via Heroku-Redis add-on
 r = redis.from_url(redisUrl)
 
@@ -83,7 +82,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # Security scheme to handle bearer tokens
 security = HTTPBearer()
@@ -122,16 +120,6 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-
-
-
-
-
-
-
-
-
-
 # Request body model for retrieving token
 class GoogleToken(BaseModel):
     id_token: str
@@ -144,8 +132,7 @@ async def retrieve_token(data: GoogleToken):
 
         # Extract user info
         user_id = idinfo["sub"]  # User's Google ID
-        email = idinfo.get("email")
-        name = idinfo.get("name")
+        name = idinfo["name"]  # User's name
 
         # Access MongoDB
         mongo_client = get_mongo_client()
@@ -153,9 +140,9 @@ async def retrieve_token(data: GoogleToken):
         resume_collection = resume_db["resume"]
 
         # Store or update user in MongoDB
-        user_data = {"_id": user_id, "email": email, "name": name, "update": "4" ,"credentials": data.id_token}
+        user_data = {"_id": user_id, "credentials": data.id_token}
         resume_collection.update_one({"_id": user_id}, {"$set": user_data}, upsert=True)
-        print(f"User verified: {name} ({email}), ID: {user_id}")
+        print(f"User verified: {name}, ID: {user_id}")
         return {"message": "User verified and stored successfully", "user_id": user_id}
     except ValueError as e:
         # Token verification failed
@@ -164,14 +151,6 @@ async def retrieve_token(data: GoogleToken):
     except Exception as e:
         print(f"Error during token processing: {e}")
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
-
-
-
-
-
-
-
-
 
 # Define the request body for the chat endpoint
 class MessageRequest(BaseModel):
@@ -184,7 +163,7 @@ def process_message(request_message: str):
         response = openAIClient.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are going to help with resume suggestions"},
+                {"role": "system", "content": "Please respond with affirmative messages about the suggestions/messages that the user provides."},
                 {"role": "user", "content": request_message}
             ]
         )
@@ -193,15 +172,6 @@ def process_message(request_message: str):
     except Exception as e:
         print(f"Error occurred during processing of message: {e}")
         return {"error": str(e)}
-
-
-
-
-
-
-
-
-
 
 class ResumeImprovementRequest(BaseModel):
     improvement_instruction: str
@@ -244,7 +214,6 @@ def improve_resume(user_id: str, improvement_instruction: str):
         )
 
         # Get the improved resume content
-        print(response.choices[0].message.content)
         improved_resume = response.choices[0].message.content
 
         # Update the resume in the database
@@ -265,13 +234,6 @@ def improve_resume(user_id: str, improvement_instruction: str):
         print(f"Error occurred during resume improvement: {e}")
         return {"error": str(e)}
 
-
-
-
-
-
-
-
 # Create endpoint for resume improvement
 @app.post("/improve_resume")
 def improve_resume_endpoint(
@@ -291,17 +253,6 @@ def improve_resume_endpoint(
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error initiating resume improvement")
 
-
-
-
-
-
-
-
-
-
-
-
 # Create endpoint for chat API
 @app.post("/chat")
 def chat(message: MessageRequest):
@@ -311,7 +262,6 @@ def chat(message: MessageRequest):
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error with OpenAI API")
-    
 
 # Create endpoint to get the result of the chat API for state logging
 @app.get("/result/{task_id}")
