@@ -118,7 +118,7 @@ async def get_current_user(
         print(f"Token verification error: {e}")
         raise HTTPException(
             status_code=401,
-            detail="Could not validate credentials",
+            detail=f"Could not validate credentials: {e}",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
