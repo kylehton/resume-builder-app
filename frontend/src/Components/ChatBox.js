@@ -78,13 +78,15 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                   return;
                 }
 
+                console.log(`Bearer ${cred}`)
+
                 fetch('https://resume-builder-backend-mu.vercel.app/improve_resume', {
                   method: 'POST',
                   headers: {
                     'Authorization': `Bearer ${cred}`, // Add the token in the Authorization header
                     'Content-Type': 'application/json'  // Ensure the content type is set to JSON
                   },
-                  body: JSON.stringify({'improvement_instruction': result})  // Send the request body as JSON
+                  body: JSON.stringify({improvement_instruction: result})  // Send the request body as JSON
                 })
                 .then(response => response.json())
                 .then(data => {
