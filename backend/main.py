@@ -172,6 +172,16 @@ def process_message(request_message: str):
     except Exception as e:
         print(f"Error occurred during processing of message: {e}")
         return {"error": str(e)}
+    
+# Create endpoint for chat API
+@app.post("/chat")
+def chat(message: MessageRequest):
+    try:
+        task = process_message.delay(message.message) # Use .delay() to run the task asynchronously
+        return {"task_id": task.id}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error with OpenAI API")
 
 class ResumeImprovementRequest(BaseModel):
     improvement_instruction: str
@@ -253,15 +263,9 @@ def improve_resume_endpoint(
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error initiating resume improvement")
 
-# Create endpoint for chat API
-@app.post("/chat")
-def chat(message: MessageRequest):
-    try:
-        task = process_message.delay(message.message) # Use .delay() to run the task asynchronously
-        return {"task_id": task.id}
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Error with OpenAI API")
+@app.get("/")
+async def root():
+    return {"message": "Connected to FastAPI Deployment"}
 
 # Create endpoint to get the result of the chat API for state logging
 @app.get("/result/{task_id}")
@@ -276,10 +280,6 @@ def get_result(task_id: str):
     else:
         print(f"Task Completed: {result.result}")
         return {"status": result.state, "result": result.result}
-
-@app.get("/")
-async def root():
-    return {"message": "testing access"}
 
 # Health check endpoint for mongo_client global connection
 @app.get("/health")
