@@ -4,6 +4,7 @@ import "./GoogleSignIn.css";
 
   const GoogleSignIn = () => {
     const clientID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
     // unable to read from .env file, so manually insert the clientID when using localhost, and 
     // revert back to this when pushing onto main branch for deployment
     const navigate = useNavigate();
@@ -42,14 +43,38 @@ import "./GoogleSignIn.css";
       };
     }, [clientID]);
   
-    const handleCredentialResponse = (response) => {
+    const handleCredentialResponse = async (response) => {
       if (response.credential) {
-        console.log("Encoded JWT ID token: " + response.credential);
+        //response.credential is the JWT token for the authenticated user
+        const payload = JSON.parse(atob((response.credential).split(".")[1]));
+        console.log("Token credentials:", response.credential);
+        console.log("User ID:", payload["sub"]);// accesses the user ID from token
+
+        // DO NOT REMOVE THIS LINE
+        // STORES LOCALLY FOR USAGE IN THE BACKEND
+        localStorage.setItem('user_credential', response.credential); // Store the token in local storage
+        console.log("Stored:", localStorage.getItem('user_credential'));
+
+        // post request to backend to store user ID and create MongoDB Document
+        const resp = await fetch('https://resume-builder-backend-mu.vercel.app/retrieve_token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: response.credential }), // Send the full token
+        });
+    
+        if (resp.ok) {
+          const data = await resp.json();
+          console.log("Backend returned data:", data);
+        } else {
+          console.error("Error from backend:", await resp.text());
+        }
+      } else {
+        console.error("No credential received from Google Sign-In");
+      }
+
         // Navigate to the dashboard after successful sign-in
         window.location.href = '/dashboard';
-      } else {
-        console.error("Error in Google Sign-In: ", response.error);
-      }
+      
     };
   
     return (

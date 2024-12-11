@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# incomplete files
+/backend/textToPDF/conversion.py
+
 # api key
 .env
 /backend/__pycache__/
