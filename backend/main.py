@@ -245,6 +245,8 @@ def improve_resume(user_id: str, improvement_instruction: str):
         return {"error": str(e)}
 
 # Create endpoint for resume improvement
+# ALSO NEEDS AUTHORIZATION : BEARER <TOKEN>
+# CONTENT_TYPE: APPLICATION/JSON
 @app.post("/improve_resume")
 def improve_resume_endpoint(
     request: ResumeImprovementRequest,
