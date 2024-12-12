@@ -300,6 +300,12 @@ def upload_resume_endpoint(
     user_id: str = Depends(get_current_user)
 ):
     try:
+        print(f"User ID: {user_id}")  # Debug print
+        
+        # Add more explicit error handling for authentication
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Authentication failed")
+        
         # Trigger the Celery task for resume upload
         task = upload_resume.delay(user_id, request.resume_content)
         
@@ -309,8 +315,8 @@ def upload_resume_endpoint(
         }
     
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Error initiating resume upload")
+        print(f"Error in upload_resume_endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 ##### BASIC CHECK UP ENDPOINTS #####
