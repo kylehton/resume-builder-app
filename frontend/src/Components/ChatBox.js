@@ -78,8 +78,6 @@ const ChatBox = ({ onResumeUpload, onDownloadClick, onAutoMessage }) => {
                   return;
                 }
 
-                console.log(`Bearer ${cred}`)
-
                 fetch('https://resume-builder-backend-mu.vercel.app/improve_resume', {
                   method: 'POST',
                   headers: {
