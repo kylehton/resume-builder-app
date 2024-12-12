@@ -70,34 +70,6 @@ const ResumeBox = ({ resumeUrl, pdfBlob, pdfName }) => {
       console.log("pdfName",pdfName);
       console.log("pdfBlob",pdfBlob);
 
-      const cred = localStorage.getItem('user_credential');
-      console.log("User Credential:", cred)
-
-      if (!cred) {
-        console.error("Credentials not found.");
-        return;
-      }
-
-      const resp = await fetch('https://resume-builder-backend-mu.vercel.app/upload_resume', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${cred}`, // Add the token in the Authorization header
-          'Content-Type': 'application/json'  // Ensure the content type is set to JSON
-        },
-        body: JSON.stringify({resume_content: pdfBlob})  // Send the request body as JSON
-      })
-      .then(resp => resp.json())
-      .then(resp => {
-        // Handle the response from the API
-        console.log("API Response:", resp);
-        if (resp.task_id) {
-          console.log(`Task initiated with ID: ${resp.task_id}`);
-        }
-      })
-      .catch(error => {
-        // Handle any errors that occurred during the request
-        console.error("Error with resume improvement request:", error);
-      });
 
       const response = await fetch(
         "https://resumeappbackendflask-50f7520726a3.herokuapp.com/process_resume",
