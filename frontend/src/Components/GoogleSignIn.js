@@ -73,7 +73,7 @@ import "./GoogleSignIn.css";
       }
 
         // Navigate to the dashboard after successful sign-in
-        window.location.href = '/dashboard';
+        //window.location.href = '/dashboard';
       
     };
   
