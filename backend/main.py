@@ -140,7 +140,7 @@ async def retrieve_token(data: GoogleToken):
         resume_collection = resume_db["resume"]
 
         # Store or update user in MongoDB
-        user_data = {"_id": user_id, "credentials": data.id_token}
+        user_data = {"content": "", "previous_content": ""}
         resume_collection.update_one({"_id": user_id}, {"$set": user_data}, upsert=True)
         print(f"User verified: {name}, ID: {user_id}")
         return {"message": "User verified and stored successfully", "user_id": user_id}
@@ -230,8 +230,8 @@ def improve_resume(user_id: str, improvement_instruction: str):
         resume_collection.update_one(
             {"_id": user_id},
             {"$set": {
+                "previous_content": current_resume,
                 "content": improved_resume,
-                "last_improved": improvement_instruction
             }}
         )
 
@@ -249,7 +249,7 @@ def improve_resume(user_id: str, improvement_instruction: str):
 def improve_resume_endpoint(
     request: ResumeImprovementRequest,
     user_id: str = Depends(get_current_user)
-):
+    ):
     try:
         # Trigger the Celery task for resume improvement
         task = improve_resume.delay(user_id, request.improvement_instruction)
@@ -262,6 +262,58 @@ def improve_resume_endpoint(
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Error initiating resume improvement")
+
+class ResumeRequest(BaseModel):
+    resume_content: str
+
+@celery.task(name="main.upload_resume")
+def upload_resume(user_id: str, resume_content: str):
+    try:
+        mongo_client = get_mongo_client()
+        resume_db = mongo_client["PlainTextResumeStorage"]
+        resume_collection = resume_db["resume"]
+
+        # Retrieve the user's resume
+        resume_doc = resume_collection.find_one({"_id": user_id})
+
+        if not resume_doc:
+            return {"error": "Resume not found"}
+
+        # Store the resume in the database
+        resume_collection.update_one(
+            {"_id": user_id},
+            {"$set": {
+                "content": resume_content,
+            }
+            }
+        )
+
+        return {"message": "Resume uploaded successfully"}
+        
+    except Exception as e:
+        print(f"Error occurred during resume upload: {e}")
+        return {"error": str(e)}
+
+@app.post("/upload_resume")
+def upload_resume_endpoint(
+    request: ResumeRequest,
+    user_id: str = Depends(get_current_user)
+):
+    try:
+        # Trigger the Celery task for resume upload
+        task = upload_resume.delay(user_id, request.resume_content)
+        
+        return {
+            "task_id": task.id,
+            "message": "Resume upload task initiated"
+        }
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error initiating resume upload")
+
+
+##### BASIC CHECK UP ENDPOINTS #####
 
 @app.get("/")
 async def root():
